@@ -1,15 +1,56 @@
-@font-face {
-  font-family: 'Samarkan';
-  src: url('/fonts/samarkan/samarkan.ttf') format('truetype');
+@import url("https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Cal+Sans&family=DM+Serif+Display:ital@0;1&family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Lobster&display=swap");
+
+.cal-sans-regular {
+  font-family: "Cal Sans", sans-serif;
   font-weight: 400;
   font-style: normal;
 }
 
-.custom-class {
-    font-family: 'Samarkan';
+.eb-garamond-normal {
+  font-family: "EB Garamond", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
 }
 
-/* Three dots loader below KavyaRang */
+.alfa-slab-one-regular {
+  font-family: "Alfa Slab One", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.lobster-regular {
+  font-family: "Lobster", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.dm-serif-display-regular-italic {
+  font-family: "DM Serif Display", serif;
+  font-weight: 400;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Samarkan";
+  src: url("/fonts/samarkan/samarkan.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+.main-container {
+  background-image: url("/p6.png");
+}
+
+.welcome-text {
+  background-image: url("/p6.png");
+}
+
+.custom-class {
+  font-family: "Samarkan";
+  background-image: url("/p6.png");
+}
+
 .loader {
   display: flex;
   gap: 10px;
@@ -19,7 +60,7 @@
 .loader div {
   width: 15px;
   height: 15px;
-  background: #D8C3A5; /* Matches text colors */
+  background: #9a6f0bff;
   border-radius: 50%;
   animation: bounce 1.4s infinite ease-in-out both;
 }
@@ -35,7 +76,9 @@
 }
 
 @keyframes bounce {
-  0%, 80%, 100% {
+  0%,
+  80%,
+  100% {
     transform: scale(0);
     opacity: 0.3;
   }
