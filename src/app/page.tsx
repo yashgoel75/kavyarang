@@ -8,13 +8,13 @@ export default function Home() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
 
-  // useEffect(() => {
-  //   const timer = setTimeout(() => {
-  //     router.push("/dashboard");
-  //   }, 3000);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      router.push("/dashboard");
+    }, 3000);
 
-  //   return () => clearTimeout(timer);
-  // }, [router]);
+    return () => clearTimeout(timer);
+  }, [router]);
 
   return (
     <main className="main-container bg-[#2E2B26] flex flex-col items-center justify-center min-h-screen p-4">
