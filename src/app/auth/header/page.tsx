@@ -13,7 +13,7 @@ export default function Header() {
         ]}
         animationSpeed={5}
         showBorder={false}
-        className="kavyansh custom-class text-[65px] md:text-[70px] mt-2"
+        className="custom-class text-[65px] md:text-[70px] mt-2"
       >
         kavyansh
       </GradientText>

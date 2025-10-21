@@ -5,8 +5,10 @@ import { Search, User as UserIcon, Menu } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getAuth, signOut, onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [isMobile, setIsMobile] = useState(true);
 
@@ -69,10 +71,10 @@ export default function Header() {
             <Menu />
           ) : (
             <div className="flex gap-2 h-[40px]">
-              <button className="flex items-center rounded-lg bg-gradient-to-br from-[#9a6f0bff] to-[#dbb56aff] text-white px-5 text-lg py-1 cursor-pointer">
+                  <button onClick={() => router.push("/auth/login")} className="flex items-center rounded-lg bg-gradient-to-br from-[#9a6f0bff] to-[#dbb56aff] text-white px-5 text-lg py-1 cursor-pointer">
                 Login
               </button>
-              <button className="px-3 py-1 border border-gray-300 rounded-lg flex items-center text-lg cursor-pointer">
+              <button onClick={() => router.push("/auth/register")} className="px-3 py-1 border border-gray-300 rounded-lg flex items-center text-lg cursor-pointer">
                 Register
               </button>
             </div>
