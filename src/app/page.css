@@ -31,13 +31,6 @@
   font-style: italic;
 }
 
-@font-face {
-  font-family: "Samarkan";
-  src: url("/fonts/samarkan/samarkan.ttf") format("truetype");
-  font-weight: 400;
-  font-style: normal;
-}
-
 .main-container {
   background-image: url("/p6.png");
 }
@@ -46,8 +39,7 @@
   background-image: url("/p6.png");
 }
 
-.custom-class {
-  font-family: "Samarkan";
+.kavyansh {
   background-image: url("/p6.png");
 }
 

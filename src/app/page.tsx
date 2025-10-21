@@ -44,7 +44,7 @@ export default function Home() {
         ]}
         animationSpeed={5}
         showBorder={false}
-        className="custom-class text-[65px] md:text-[100px]"
+        className="kavyansh custom-class text-[65px] md:text-[100px]"
       >
         kavyansh
       </GradientText>

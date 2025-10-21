@@ -43,6 +43,7 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
@@ -120,3 +121,15 @@
     @apply bg-background text-foreground;
   }
 }
+
+@font-face {
+  font-family: "Samarkan";
+  src: url("/fonts/samarkan/samarkan.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+.custom-class {
+  font-family: "Samarkan";
+}
+
