@@ -46,7 +46,7 @@ export default function Home() {
         showBorder={false}
         className="custom-class text-[65px] md:text-[100px]"
       >
-        KavyaRang
+        kavyansh
       </GradientText>
 
       {loading && (
