@@ -16,7 +16,7 @@ export default function Header() {
           ]}
           animationSpeed={5}
           showBorder={false}
-          className="custom-class text-[35px] md:text-[65px] ml-3"
+          className="custom-class text-[35px] md:text-[65px] ml-1"
         >
           kavyansh
         </GradientText>
@@ -26,7 +26,7 @@ export default function Header() {
         <div className="flex items-center bg-gray-100 border-1 hidden md:flex md:w-[500px] border-gray-300 px-3 focus:outline-none rounded-md md:rounded-2xl h-[30px] md:h-[50px] mx-5">
           <Search color="gray" />
           <input
-            className="mx-3 h-full w-full focus:outline-none"
+            className="text-lg mx-3 h-full w-full focus:outline-none"
             placeholder="Search stories, authors, or topics..."
           ></input>
         </div>
