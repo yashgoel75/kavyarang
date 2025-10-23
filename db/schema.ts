@@ -29,6 +29,6 @@ const UserSchema = new Schema({
     profilePicture: String,
 }, { timestamps: true });
 
-export const User = mongoose.model("User", UserSchema);
-export const Post = mongoose.model("Post", PostSchema);
-export const Comment = mongoose.model("Comment", CommentSchema);
+export const User = mongoose.models.User || mongoose.model("User", UserSchema);
+export const Post = mongoose.models.Post || mongoose.model("Post", PostSchema);
+export const Comment = mongoose.models.Comment || mongoose.model("Comment", CommentSchema);

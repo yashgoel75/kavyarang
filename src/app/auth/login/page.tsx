@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import "./page.css";
@@ -25,7 +24,7 @@ export default function Login() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        router.replace("/account");
+        router.replace("/dashboard");
       }
     });
 
@@ -91,7 +90,7 @@ export default function Login() {
     try {
       await signInWithEmailAndPassword(auth, formData.email, formData.password);
       setSuccess(true);
-      setTimeout(() => router.replace("/account"), 1500);
+      setTimeout(() => router.replace("/dashboard"), 1500);
     } catch (err) {
       setError(true);
       // console.error(err);

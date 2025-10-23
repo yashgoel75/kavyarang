@@ -119,7 +119,7 @@ export default function Member() {
       const res = await axios.post("/api/register/member", formData);
       if (res.status === 200) {
         setSuccess(true);
-        setTimeout(() => router.push("/auth/Login"), 1500);
+        setTimeout(() => router.push("/auth/login"), 1500);
       }
     } catch (err) {
       setError("Registration failed. Please try again.");

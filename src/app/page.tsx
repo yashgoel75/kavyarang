@@ -2,19 +2,30 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import GradientText from "@/components/GradientText";
+import { getAuth, signOut, onAuthStateChanged, User } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+
 import "./page.css";
 
 export default function Home() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
+  const [displayName, setDisplayName] = useState("");
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      router.push("/dashboard");
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, [router]);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+      if (user?.email) {
+        router.replace("/dashboard");
+      } else {
+        const timer = setTimeout(() => {
+          router.push("/auth/login");
+        }, 3000);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   return (
     <main className="main-container bg-[#2E2B26] flex flex-col items-center justify-center min-h-screen p-4">

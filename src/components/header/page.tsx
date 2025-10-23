@@ -10,14 +10,47 @@ import { useRouter } from "next/navigation";
 export default function Header() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
+  const [displayName, setDisplayName] = useState("");
   const [isMobile, setIsMobile] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
+      if (user?.email) fetchUserName(user.email);
     });
     return () => unsubscribe();
   }, []);
+
+  const fetchUserName = async (email: string) => {
+    try {
+      // const token = await getFirebaseToken();
+      const response = await fetch(
+        `/api/user?email=${encodeURIComponent(email)}`,
+        {
+          headers: {
+            // Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = await response.json();
+      if (!response.ok)
+        throw new Error(data.error || "Failed to fetch user name");
+      setDisplayName(data.name);
+      console.log("Fetched user name:", data.name);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(getAuth());
+      setUser(null);
+      router.replace("/");
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -66,15 +99,24 @@ export default function Header() {
         </div>
         <div>
           {user ? (
-            <UserIcon />
+            <div className="flex gap-2">
+              <UserIcon />
+              <button className="text-lg cursor-pointer" onClick={() => handleLogout()}>Logout</button>
+            </div>
           ) : isMobile ? (
             <Menu />
           ) : (
             <div className="flex gap-2 h-[40px]">
-                  <button onClick={() => router.push("/auth/login")} className="flex items-center rounded-lg bg-gradient-to-br from-[#9a6f0bff] to-[#dbb56aff] text-white px-5 text-lg py-1 cursor-pointer">
+              <button
+                onClick={() => router.push("/auth/login")}
+                className="flex items-center rounded-lg bg-gradient-to-br from-[#9a6f0bff] to-[#dbb56aff] text-white px-5 text-lg py-1 cursor-pointer"
+              >
                 Login
               </button>
-              <button onClick={() => router.push("/auth/register")} className="px-3 py-1 border border-gray-300 rounded-lg flex items-center text-lg cursor-pointer">
+              <button
+                onClick={() => router.push("/auth/register")}
+                className="px-3 py-1 border border-gray-300 rounded-lg flex items-center text-lg cursor-pointer"
+              >
                 Register
               </button>
             </div>
