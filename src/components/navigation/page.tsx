@@ -1,35 +1,53 @@
 "use client";
 
-import { Home, Bookmark, Bell, User, Settings, Icon } from "lucide-react";
+import { Home, Bookmark, User, Settings } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export default function Navigation() {
   const [isMobile, setIsMobile] = useState(false);
+  const [isFooterVisible, setIsFooterVisible] = useState(false);
+
   useEffect(() => {
-    if (window.innerWidth <= 768) {
-      setIsMobile(true);
-    } else {
-      setIsMobile(false);
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    const footer = document.getElementById("app-footer");
+    if (footer) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          setIsFooterVisible(entry.isIntersecting);
+        },
+        { threshold: 0.1 }
+      );
+
+      observer.observe(footer);
+      return () => {
+        observer.disconnect();
+        window.removeEventListener("resize", handleResize);
+      };
     }
-  });
+  }, []);
 
   const icons = [Home, Bookmark, Settings, User];
 
-function renderIcons() {
-  return (
-    <div className="flex py-3 z-90 gap-7 border-1 border-gray-300 shadow-lg rounded-full px-7">
-      {icons.map((Icon, indx) => {
-        return (
-          <Icon key={indx} size={isMobile ? 25 : 30} className="cursor-pointer hover:scale-125 transition" />
-        );
-      })}
-    </div>
-  );
-}
   return (
     <>
-      <div className="absolute w-full flex justify-center bottom-7">
-        {renderIcons()}
+      <div
+        className={`fixed bottom-6 left-0 w-full flex justify-center transition-all duration-300 ease-in-out ${
+          isFooterVisible ? "opacity-0 pointer-events-none translate-y-5" : "opacity-100 translate-y-0"
+        }`}
+      >
+        <div className="flex py-3 gap-7 bg-white border border-gray-300 shadow-lg rounded-full px-7">
+          {icons.map((Icon, indx) => (
+            <Icon
+              key={indx}
+              size={isMobile ? 25 : 30}
+              className="cursor-pointer hover:scale-125 transition"
+            />
+          ))}
+        </div>
       </div>
     </>
   );

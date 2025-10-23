@@ -10,6 +10,7 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import Header from "../header/page";
+import Footer from "../footer/page";
 import { auth } from "@/lib/firebase";
 export default function Login() {
   const router = useRouter();
@@ -281,6 +282,7 @@ export default function Login() {
         </div>
       </div>
       <div className="fixed w-full bottom-0 mt-5"></div>
+      <Footer/>
     </>
   );
 }

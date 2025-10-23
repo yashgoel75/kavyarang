@@ -2,6 +2,7 @@
 
 import Header from "@/components/header/page";
 import Navigation from "@/components/navigation/page";
+import Footer from "@/components/footer/page";
 import { useState, useEffect } from "react";
 import { getAuth, signOut, onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -48,10 +49,11 @@ export default function dashboard() {
   return (
     <>
       <Header />
-      <div className="relative flex items-center justify-center">
+      <div className="relative min-h-screen flex items-center justify-center">
         My name is {displayName}
       </div>
       <Navigation />
+      <Footer/>
     </>
   );
 }

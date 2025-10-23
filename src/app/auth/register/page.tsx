@@ -6,6 +6,7 @@ import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Header from "../header/page";
+import Footer from "../footer/page";
 import { AtSign } from "lucide-react";
 
 export default function Member() {
@@ -674,6 +675,7 @@ export default function Member() {
           </Link>
         </div>
       </div>
+      <Footer/>
     </>
   );
 }
