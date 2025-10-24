@@ -29,6 +29,8 @@ interface Post {
   content: string;
   picture?: string;
   likes: number;
+  tags: [string];
+  color: string;
 }
 
 export default function CreatePost() {
@@ -41,6 +43,9 @@ export default function CreatePost() {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [color, setColor] = useState("#ffffff");
+  const [allTags, setAllTags] = useState("");
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -151,6 +156,8 @@ export default function CreatePost() {
           content,
           picture: coverImage,
           email: firebaseUser?.email,
+          tags: tags,
+          color: color,
         }),
       });
 
@@ -167,10 +174,24 @@ export default function CreatePost() {
     }
   };
 
+  useEffect(() => {
+    if (allTags) {
+      const extractedTags = allTags
+        .split(" ")
+        .map((tag) => tag.replace("#", "").trim())
+        .filter((tag) => tag.length > 0);
+
+      setTags(extractedTags);
+      console.log(tags);
+    } else {
+      setTags([]);
+    }
+  }, [allTags]);
+
   return (
     <>
       <Header />
-      <main className="max-w-4xl mx-auto px-4 py-10 min-h-[85vh]">
+      <main className="relative max-w-4xl mx-auto px-4 py-10 min-h-[85vh]">
         <div className="mb-10">
           <h2 className="text-4xl font-bold text-gray-800 mb-1">
             Create a Post
@@ -268,6 +289,35 @@ export default function CreatePost() {
             </div>
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Tags
+            </label>
+            <input
+              type="text"
+              value={allTags}
+              onChange={(e) => {
+                setAllTags(e.target.value);
+                console.log(allTags);
+              }}
+              placeholder="Start with #"
+              className="w-full border border-gray-300 px-4 py-2 rounded-md focus:ring-2 focus:ring-[#bd9864ff] focus:border-[#bd9864ff] focus:outline-none transition-all"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Color representing your mood the best
+            </label>
+            <input
+              type="color"
+              value={color}
+              onChange={(e) => {
+                setColor(e.target.value);
+                console.log(color);
+              }}
+              className="border border-gray-300 px-4 py-2 rounded-md focus:ring-2 focus:ring-[#bd9864ff] focus:border-[#bd9864ff] focus:outline-none transition-all"
+            />
+          </div>
           <button
             onClick={handleSubmit}
             disabled={isSubmitting}

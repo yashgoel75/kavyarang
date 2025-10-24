@@ -7,6 +7,8 @@ interface CreatePostRequest {
   content: string;
   picture?: string | null;
   email: string;
+  tags: string[];
+  color: string;
 }
 
 export async function POST(req: NextRequest) {
@@ -14,7 +16,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body: CreatePostRequest = await req.json();
-    const { title, content, picture, email } = body;
+    const { title, content, picture, email, tags, color } = body;
 
     if (!title || !content) {
       return NextResponse.json(
@@ -42,6 +44,8 @@ export async function POST(req: NextRequest) {
       author: user._id,
       likes: 0,
       comments: [],
+      tags: tags,
+      color: color,
     });
 
     user.posts.push(post._id);

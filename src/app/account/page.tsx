@@ -24,6 +24,7 @@ interface Post {
   content: string;
   picture?: string;
   likes: number;
+  color: string;
 }
 
 export default function Account() {
@@ -236,6 +237,20 @@ export default function Account() {
     );
   }
 
+  function getTextColor(bgColor: string): string {
+    // Convert hex color to RGB
+    const hex = bgColor.replace("#", "");
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+
+    // Calculate brightness (perceived luminance)
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+
+    // Return black for light backgrounds, white for dark
+    return brightness > 128 ? "#000000" : "#ffffff";
+  }
+
   return (
     <>
       <Header />
@@ -431,13 +446,15 @@ export default function Account() {
               {userData.posts.map((post) => (
                 <div
                   key={post._id}
-                  className="bg-white border border-gray-200 rounded-lg shadow-sm p-5 hover:shadow-md transition-shadow duration-200"
+                  style={{
+                    backgroundColor: post.color || "#ffffff",
+                    color: getTextColor(post.color || "#ffffff"),
+                  }}
+                  className="border border-gray-200 rounded-lg shadow-sm p-5 hover:shadow-md transition-shadow duration-200"
                 >
-                  <h4 className="text-lg font-semibold mb-2 text-gray-800">
-                    {post.title}
-                  </h4>
+                  <h4 className="text-lg font-semibold mb-2">{post.title}</h4>
                   <p
-                    className="text-gray-600 text-sm mb-3 leading-relaxed"
+                    className="text-sm mb-3 leading-relaxed"
                     dangerouslySetInnerHTML={{
                       __html:
                         post.content.length > 120
@@ -456,7 +473,7 @@ export default function Account() {
                       />
                     </div>
                   )}
-                  <div className="flex items-center gap-1.5 text-gray-500 text-sm">
+                  <div className="flex items-center gap-1.5 text-sm">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-4 w-4"

@@ -92,7 +92,7 @@ export default function Header() {
 
   return (
     <>
-      <div className="fixed w-full flex justify-between items-center px-5 mt-2 md:mt-0 z-20 bg-white">
+      <div className="w-full flex justify-between items-center px-5 mt-2 md:mt-0 z-20 bg-white">
         <GradientText
           colors={[
             "#9a6f0bff",

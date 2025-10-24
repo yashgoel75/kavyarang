@@ -16,8 +16,10 @@ const PostSchema = new Schema({
     content: { type: String, required: true },
     picture: String,
     author: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    tags: [String],
     likes: { type: Number, default: 0 },
     comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
+    color: { type: String, required: false },
 }, { timestamps: true });
 
 
@@ -28,6 +30,7 @@ const UserSchema = new Schema({
     posts: [String],
     bio: String,
     profilePicture: String,
+    bookmarks: [String],
 }, { timestamps: true });
 
 export const User = mongoose.models.User || mongoose.model("User", UserSchema);
