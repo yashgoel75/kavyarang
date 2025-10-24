@@ -41,7 +41,7 @@ export default function Navigation() {
   return (
     <>
       <div
-        className={`fixed bottom-6 left-0 w-full flex justify-center transition-all duration-300 ease-in-out ${
+        className={`fixed bottom-6 left-0 w-full flex justify-center transition-all duration-300 ease-in-out z-1000 ${
           isFooterVisible
             ? "opacity-0 pointer-events-none translate-y-5"
             : "opacity-100 translate-y-0"

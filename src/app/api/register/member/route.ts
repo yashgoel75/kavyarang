@@ -61,6 +61,8 @@ export async function POST(req: NextRequest) {
       email,
       bio: bio || "",
       profilePicture: profilePicture || "",
+      instagram: "",
+      snapchat: "",
     });
 
     return NextResponse.json(

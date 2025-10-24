@@ -29,3 +29,56 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+
+interface Post {
+  _id: string;
+  title: string;
+  content: string;
+  picture?: string;
+  likes: number;
+  color: string;
+}
+
+interface User {
+  email: string;
+  posts: Post[];
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { email, postId } = body as { email?: string; postId?: string };
+
+    if (!email || !postId) {
+      return NextResponse.json(
+        { error: "Missing email or postId" },
+        { status: 400 }
+      );
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const deleted = await Post.findByIdAndDelete(postId);
+    if (!deleted) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
+
+    user.posts = user.posts.filter((id: { toString: () => string; }) => id.toString() !== postId);
+    await user.save();
+
+    return NextResponse.json({
+      message: "Post deleted successfully",
+      posts: user.posts,
+    });
+  } catch (err) {
+    console.error("Failed to delete post:", err);
+    return NextResponse.json(
+      { error: "Failed to delete post" },
+      { status: 500 }
+    );
+  }
+}

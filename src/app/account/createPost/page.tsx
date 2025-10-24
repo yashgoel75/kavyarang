@@ -182,7 +182,6 @@ export default function CreatePost() {
         .filter((tag) => tag.length > 0);
 
       setTags(extractedTags);
-      console.log(tags);
     } else {
       setTags([]);
     }

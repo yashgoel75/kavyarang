@@ -31,6 +31,8 @@ const UserSchema = new Schema({
     bio: String,
     profilePicture: String,
     bookmarks: [String],
+    instagram: String,
+    snapchat: String,
 }, { timestamps: true });
 
 export const User = mongoose.models.User || mongoose.model("User", UserSchema);
