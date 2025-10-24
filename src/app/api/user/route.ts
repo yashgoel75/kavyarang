@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
         const name = existingUser.name;
 
         return NextResponse.json(
-            { name: name },
+            { name: name, user: existingUser},
             { status: 200 }
         );
     } catch (error: unknown) {
@@ -29,4 +29,28 @@ export async function GET(req: NextRequest) {
             { status: 500 }
         );
     }
+}
+
+export async function PATCH(req: NextRequest) {
+  await register();
+//   const authHeader = req.headers.get("Authorization");
+//   if (!authHeader || !authHeader.startsWith("Bearer ")) {
+//     return NextResponse.json({ error: "Missing token" }, { status: 401 });
+//   }
+//   const token = authHeader.split(" ")[1];
+//   const decodedToken = await verifyFirebaseToken(token);
+//   if (!decodedToken) {
+//     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+//   }
+
+  const body = await req.json();
+  const { email, updates } = body;
+
+  const updatedUser = await User.findOneAndUpdate(
+    { email: email },
+    updates,
+    { new: true }
+  );
+
+  return NextResponse.json({ success: true, user: updatedUser });
 }

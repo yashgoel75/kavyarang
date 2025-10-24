@@ -116,7 +116,7 @@ export default function Login() {
     <>
       <Header />
       <div className="border-1 border-gray-200 mt-2"></div>
-      <div className="w-[95%] lg:w-full max-w-4xl mx-auto pt-10 onest-normal">
+      <div className="w-[95%] lg:w-full max-w-4xl mx-auto pt-10 onest-normal min-h-[75vh]">
         <div className="border md:text-lg border-gray-300 p-6 rounded-xl shadow-md bg-white mb-8">
           <h1 className="text-2xl font-bold text-center mb-6 text-gray-800">
             Welcome Back!{" "}
