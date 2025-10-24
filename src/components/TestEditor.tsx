@@ -15,7 +15,6 @@ export default function QuillEditor({ value, onChange }: QuillEditorProps) {
 
   useEffect(() => {
     if (editorRef.current && !quillInstance.current) {
-      // Clean up any existing toolbars in the container
       if (containerRef.current) {
         const existingToolbars =
           containerRef.current.querySelectorAll(".ql-toolbar");
@@ -24,8 +23,7 @@ export default function QuillEditor({ value, onChange }: QuillEditorProps) {
 
       quillInstance.current = new Quill(editorRef.current, {
         theme: "snow",
-        placeholder:
-          "Write your test description here... Include instructions, topics covered, grading criteria, and any special notes for students.",
+        placeholder: "Begin your story here...",
         modules: {
           toolbar: [
             ["bold", "italic", "underline"],
@@ -54,11 +52,9 @@ export default function QuillEditor({ value, onChange }: QuillEditorProps) {
     };
   }, []);
 
-  // Complete cleanup on unmount
   useEffect(() => {
     return () => {
       if (quillInstance.current) {
-        // Remove the toolbar before destroying
         const toolbar = containerRef.current?.querySelector(".ql-toolbar");
         if (toolbar) {
           toolbar.remove();

@@ -54,7 +54,9 @@ export default function Account() {
 
   const fetchUserData = async (email: string) => {
     try {
-      const res = await fetch(`/api/user?email=${encodeURIComponent(email)}`);
+      const res = await fetch(
+        `/api/user/posts?email=${encodeURIComponent(email)}`
+      );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load user data");
       setUserData(data.user);
@@ -434,11 +436,16 @@ export default function Account() {
                   <h4 className="text-lg font-semibold mb-2 text-gray-800">
                     {post.title}
                   </h4>
-                  <p className="text-gray-600 text-sm mb-3 leading-relaxed">
-                    {post.content.length > 120
-                      ? post.content.slice(0, 120) + "..."
-                      : post.content}
-                  </p>
+                  <p
+                    className="text-gray-600 text-sm mb-3 leading-relaxed"
+                    dangerouslySetInnerHTML={{
+                      __html:
+                        post.content.length > 120
+                          ? post.content.slice(0, 120) + "..."
+                          : post.content,
+                    }}
+                  ></p>
+
                   {post.picture && (
                     <div className="relative w-full h-48 mb-3 rounded-md overflow-hidden">
                       <Image

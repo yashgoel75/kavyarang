@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { User } from "../../../../db/schema";
+import { User, Post } from "../../../../db/schema";
 import { register } from "@/instrumentation";
 
 interface CreatePostRequest {
   title: string;
   content: string;
   picture?: string | null;
-    email: string;
+  email: string;
 }
 
 export async function POST(req: NextRequest) {
@@ -35,20 +35,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "User not found." }, { status: 404 });
     }
 
-    const newPost = {
+    const post = await Post.create({
       title,
       content,
       picture: picture || null,
       author: user._id,
       likes: 0,
       comments: [],
-    };
+    });
 
-    user.posts.push(newPost);
+    user.posts.push(post._id);
     await user.save();
 
     return NextResponse.json(
-      { message: "Post created successfully", post: newPost },
+      { message: "Post created successfully", post },
       { status: 201 }
     );
   } catch (err) {
