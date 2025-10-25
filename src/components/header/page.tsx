@@ -169,6 +169,7 @@ export default function Header() {
           {renderSearch()}
         </div>
       )}
+      <div className="border-1 border-gray-200 mt-2"></div>
     </>
   );
 }

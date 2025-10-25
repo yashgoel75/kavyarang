@@ -8,6 +8,15 @@ import { getAuth, signOut, onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 
+interface Post {
+  _id: string;
+  title: string;
+  content: string;
+  picture?: string;
+  likes: number;
+  color: string;
+}
+
 export default function dashboard() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -46,6 +55,25 @@ export default function dashboard() {
     }
   };
 
+  const [posts, setPosts] = useState<Post[] | null>();
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const res = await fetch(`/api/getPosts`);
+        const data = await res.json();
+        const filteredPosts = data.posts.filter((post: Post) => {
+          return post.picture != null;
+        });
+        console.log(filteredPosts);
+        setPosts(filteredPosts);
+      } catch (error: unknown) {
+        console.log(error);
+      }
+    };
+    fetchPosts();
+  }, []);
+
   return (
     <>
       <Header />
@@ -53,7 +81,7 @@ export default function dashboard() {
         My name is {displayName}
       </div>
       <Navigation />
-      <Footer/>
+      <Footer />
     </>
   );
 }

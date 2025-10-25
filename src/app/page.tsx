@@ -17,11 +17,13 @@ export default function Home() {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       if (user?.email) {
-        router.replace("/dashboard");
+        const timer = setTimeout(() => {
+          router.replace("/dashboard");
+        }, 1500);
       } else {
         const timer = setTimeout(() => {
-          router.push("/auth/login");
-        }, 3000);
+          router.replace("/auth/login");
+        }, 1500);
       }
     });
     return () => unsubscribe();

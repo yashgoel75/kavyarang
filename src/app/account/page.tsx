@@ -21,6 +21,8 @@ interface User {
   posts?: Post[];
   snapchat: string;
   instagram: string;
+  followers: string[];
+  following: string[];
 }
 
 interface Post {
@@ -531,43 +533,59 @@ export default function Account() {
           </div>
           <div className="border-1 rounded-xl shadow-lg border-gray-100 p-5">
             <div className="flex flex-col gap-5">
-              <div>
-                <a
-                  href={`https://instagram.com/${userData.instagram}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 px-5 py-2 rounded-xl bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 text-white shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1"
-                >
-                  <Image
-                    src={instagram}
-                    width={25}
-                    height={25}
-                    alt="Instagram"
-                    className="shadow-md"
-                  />
-                  <span className="font-medium truncate">
-                    {userData.instagram}
-                  </span>
-                </a>
+              <div className="flex flex-col gap-5">
+                <div>
+                  <a
+                    href={`https://instagram.com/${userData.instagram}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 px-5 py-2 rounded-xl bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 text-white shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1"
+                  >
+                    <Image
+                      src={instagram}
+                      width={25}
+                      height={25}
+                      alt="Instagram"
+                      className="shadow-md"
+                    />
+                    <span className="font-medium truncate">
+                      {userData.instagram}
+                    </span>
+                  </a>
+                </div>
+                <div>
+                  <a
+                    href={`https://snapchat.com/add/${userData.snapchat}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 px-5 py-2 rounded-xl bg-[#f5ec00] text-black shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1"
+                  >
+                    <Image
+                      src={snapchat}
+                      width={25}
+                      height={25}
+                      alt="Snapchat"
+                      className="rounded-full shadow-md"
+                    />
+                    <span className="font-medium truncate">
+                      {userData.snapchat}
+                    </span>
+                  </a>
+                </div>
               </div>
-              <div>
-                <a
-                  href={`https://snapchat.com/add/${userData.snapchat}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 px-5 py-2 rounded-xl bg-[#f5ec00] text-black shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1"
-                >
-                  <Image
-                    src={snapchat}
-                    width={25}
-                    height={25}
-                    alt="Snapchat"
-                    className="rounded-full shadow-md"
-                  />
-                  <span className="font-medium truncate">
-                    {userData.snapchat}
-                  </span>
-                </a>
+              <div className="flex gap-4 justify-around bg-gray-50 md:flex-col md:space-y-4 md:mt-3 px-3 py-5 rounded-lg shadow-xl">
+                <div className="text-center">
+                  <h3 className="text-2xl font-semibold text-gray-800">
+                    {userData.followers?.length || 0}
+                  </h3>
+                  <p>{userData.followers?.length == 1 ? "follower" : "followers"}</p>
+                </div>
+                <div className="text-center">
+                  <h3 className="text-2xl font-semibold text-gray-800">
+                    {userData.following?.length || 0}
+                  </h3>
+                  <p>{userData.followers?.length == 1 ? "following" : "followings"}</p>
+                </div>
               </div>
             </div>
           </div>
