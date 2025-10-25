@@ -1,8 +1,9 @@
 "use client";
 
-import { Home, Bookmark, User, Settings } from "lucide-react";
+import { Home, Bookmark, User, Settings, Heart } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { title } from "process";
 
 export default function Navigation() {
   const [isMobile, setIsMobile] = useState(false);
@@ -32,10 +33,11 @@ export default function Navigation() {
   }, []);
 
   const icons = [
-    { name: Home, url: "dashboard" },
-    { name: Bookmark, url: "bookmark" },
-    { name: Settings, url: "settings" },
-    { name: User, url: "account" },
+    { name: Home, url: "dashboard", title: "Home" },
+    { name: Bookmark, url: "bookmark", title: "Bookmarks" },
+    { name: Heart, url: "likes", title: "Likes" },
+    // { name: Settings, url: "settings" },
+    { name: User, url: "account", title: "Account" },
   ];
 
   return (
@@ -49,7 +51,7 @@ export default function Navigation() {
       >
         <div className="flex py-3 gap-7 bg-white border border-gray-300 shadow-lg rounded-full px-7">
           {icons.map((Icon, indx) => (
-            <Link key={indx} href={`/${Icon.url}`}>
+            <Link key={indx} href={`/${Icon.url}`} title={Icon.title}>
               <Icon.name
                 size={isMobile ? 25 : 30}
                 className="cursor-pointer hover:scale-125 transition"

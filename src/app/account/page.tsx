@@ -531,47 +531,52 @@ export default function Account() {
               )}
             </div>
           </div>
-          <div className="border-1 rounded-xl shadow-lg border-gray-100 p-5">
-            <div className="flex flex-col gap-5">
+          <div className="border-1 min-w-[300px] rounded-xl shadow-lg border-gray-100 p-5">
+            <div className="flex flex-col">
               <div className="flex flex-col gap-5">
-                <div>
-                  <a
-                    href={`https://instagram.com/${userData.instagram}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 px-5 py-2 rounded-xl bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 text-white shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1"
-                  >
-                    <Image
-                      src={instagram}
-                      width={25}
-                      height={25}
-                      alt="Instagram"
-                      className="shadow-md"
-                    />
-                    <span className="font-medium truncate">
-                      {userData.instagram}
-                    </span>
-                  </a>
-                </div>
-                <div>
-                  <a
-                    href={`https://snapchat.com/add/${userData.snapchat}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 px-5 py-2 rounded-xl bg-[#f5ec00] text-black shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1"
-                  >
-                    <Image
-                      src={snapchat}
-                      width={25}
-                      height={25}
-                      alt="Snapchat"
-                      className="rounded-full shadow-md"
-                    />
-                    <span className="font-medium truncate">
-                      {userData.snapchat}
-                    </span>
-                  </a>
-                </div>
+                {userData.instagram ? (
+                  <div>
+                    <a
+                      href={`https://instagram.com/${userData.instagram}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 px-5 py-2 rounded-xl bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 text-white shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1"
+                    >
+                      <Image
+                        src={instagram}
+                        width={25}
+                        height={25}
+                        alt="Instagram"
+                        className="shadow-md"
+                      />
+                      <span className="font-medium truncate">
+                        {userData.instagram}
+                      </span>
+                    </a>
+                  </div>
+                ) : null}
+
+                {userData.snapchat ? (
+                  <div>
+                    <a
+                      href={`https://snapchat.com/add/${userData.snapchat}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 px-5 py-2 rounded-xl bg-[#f5ec00] text-black shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1"
+                    >
+                      <Image
+                        src={snapchat}
+                        width={25}
+                        height={25}
+                        alt="Snapchat"
+                        className="rounded-full shadow-md"
+                      />
+                      <span className="font-medium truncate">
+                        {userData.snapchat}
+                      </span>
+                    </a>
+                  </div>
+                ) : null}
               </div>
               <div className="flex gap-4 justify-around bg-gray-50 md:flex-col md:space-y-4 md:mt-3 px-3 py-5 rounded-lg shadow-xl">
                 <div className="text-center">
@@ -627,11 +632,16 @@ export default function Account() {
                       backgroundColor: post.color || "#ffffff",
                       color: getTextColor(post.color || "#ffffff"),
                     }}
-                    className="border border-gray-200 rounded-lg shadow-sm p-5 hover:shadow-md transition-shadow duration-200"
+                    className="cursor-pointer border border-gray-200 rounded-lg shadow-sm p-5 hover:shadow-md transition-shadow duration-200"
                   >
                     <div className="flex relative items-center justify-between">
                       <div>
-                        <h4 className="text-lg font-semibold">{post.title}</h4>
+                        <h4
+                          className="text-lg font-semibold"
+                          onClick={() => router.push(`/post/${post._id}`)}
+                        >
+                          {post.title}
+                        </h4>
                       </div>
 
                       <div className="">
@@ -679,6 +689,7 @@ export default function Account() {
 
                     <p
                       className="text-sm mb-3 leading-relaxed"
+                      onClick={() => router.push(`/post/${post._id}`)}
                       dangerouslySetInnerHTML={{
                         __html:
                           post.content?.length > 120
@@ -688,7 +699,10 @@ export default function Account() {
                     ></p>
 
                     {post.picture && (
-                      <div className="relative w-full h-48 mb-3 rounded-md overflow-hidden">
+                      <div
+                        className="relative w-full h-48 mb-3 rounded-md overflow-hidden"
+                        onClick={() => router.push(`/post/${post._id}`)}
+                      >
                         <Image
                           src={post.picture}
                           alt="Post image"
