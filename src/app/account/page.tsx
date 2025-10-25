@@ -307,17 +307,28 @@ export default function Account() {
     return brightness > 128 ? "#000000" : "#ffffff";
   }
 
+  function getBackgroundColor(bgColor: string): string {
+    const hex = bgColor.replace("#", "");
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+
+    return brightness > 128 ? "#000000" : "#ffffff";
+  }
+
   return (
     <>
       <Header />
-      <main className="max-w-4xl mx-auto px-4 py-10 min-h-[85vh]">
+      <main className="max-w-5xl mx-auto px-4 py-10 min-h-[85vh]">
         <div className="mb-10">
           <h2 className="text-4xl font-bold text-gray-800 mb-1">My Account</h2>
           <div className="h-0.5 w-20 bg-gradient-to-r from-[#bd9864ff] to-transparent"></div>
         </div>
 
-        <div className="flex justify-around gap-5 bg-white shadow-sm rounded-lg p-8 mb-8 border border-gray-100">
-          <div className="border-1 w-lg  rounded-xl shadow-lg border-gray-100 p-5">
+        <div className="flex-1 space-y-4 md:flex justify-around gap-1 bg-white shadow-sm rounded-lg p-8 mb-8 border border-gray-100">
+          <div className="border-1 lg:w-lg rounded-xl shadow-lg border-gray-100 p-5">
             <div className="flex flex-col items-center space-y-6">
               <div className="relative">
                 <div className="relative w-32 h-32">
@@ -448,7 +459,7 @@ export default function Account() {
                       )}
                   </div>
 
-                  <div className="w-full max-w-md space-y-4">
+                  <div className="w-full  space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Instagram
@@ -579,88 +590,108 @@ export default function Account() {
 
           {userData.posts && userData.posts.length > 0 ? (
             <div className="grid md:grid-cols-2 gap-5">
-              {userData.posts.map((post) => (
-                <div
-                  key={post._id}
-                  style={{
-                    backgroundColor: post.color || "#ffffff",
-                    color: getTextColor(post.color || "#ffffff"),
-                  }}
-                  className="border border-gray-200 rounded-lg shadow-sm p-5 hover:shadow-md transition-shadow duration-200"
-                >
-                  <div className="flex relative items-center justify-between mb-2">
-                    <div>
-                      <h4 className="text-lg font-semibold">{post.title}</h4>
+              {userData.posts.map((post) => {
+                const wordCount = post.content
+                  ? post.content.split(/\s+/).length
+                  : 0;
+                const readingTime = Math.ceil(wordCount / 200) || 1;
+
+                return (
+                  <div
+                    key={post._id}
+                    style={{
+                      backgroundColor: post.color || "#ffffff",
+                      color: getTextColor(post.color || "#ffffff"),
+                    }}
+                    className="border border-gray-200 rounded-lg shadow-sm p-5 hover:shadow-md transition-shadow duration-200"
+                  >
+                    <div className="flex relative items-center justify-between">
+                      <div>
+                        <h4 className="text-lg font-semibold">{post.title}</h4>
+                      </div>
+
+                      <div className="">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="lucide lucide-ellipsis-vertical-icon lucide-ellipsis-vertical cursor-pointer"
+                          onClick={() =>
+                            setOpenMenuPostId(
+                              openMenuPostId === post._id ? null : post._id
+                            )
+                          }
+                        >
+                          <circle cx="12" cy="12" r="1" />
+                          <circle cx="12" cy="5" r="1" />
+                          <circle cx="12" cy="19" r="1" />
+                        </svg>
+                      </div>
+
+                      {openMenuPostId === post._id && (
+                        <div
+                          className="absolute top-6 right-0 z-10 px-3 py-1 rounded-md text-sm cursor-pointer transition-colors duration-200 hover:bg-red-700 hover:text-white"
+                          onClick={() => handleDelete(post._id)}
+                          style={{
+                            backgroundColor: getTextColor(
+                              post.color || "#ffffff"
+                            ),
+                            color: getBackgroundColor(
+                              getTextColor(post.color || "#ffffff")
+                            ),
+                          }}
+                        >
+                          Delete
+                        </div>
+                      )}
                     </div>
-                    <div className="relative">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="lucide lucide-ellipsis-vertical-icon lucide-ellipsis-vertical cursor-pointer"
-                        onClick={() =>
-                          setOpenMenuPostId(
-                            openMenuPostId === post._id ? null : post._id
-                          )
-                        }
-                      >
-                        <circle cx="12" cy="12" r="1" />
-                        <circle cx="12" cy="5" r="1" />
-                        <circle cx="12" cy="19" r="1" />
-                      </svg>
-                    </div>
-                    {openMenuPostId === post._id && (
-                      <div
-                        className="absolute top-6 right-0 z-10 px-3 py-1 rounded-md bg-red-700 text-red-100 text-sm cursor-pointer hover:bg-red-800 transition-colors"
-                        onClick={() => handleDelete(post._id)}
-                      >
-                        Delete
+                    <span className="text-xs mb-2">{readingTime} min read</span>
+
+                    <p
+                      className="text-sm mb-3 leading-relaxed"
+                      dangerouslySetInnerHTML={{
+                        __html:
+                          post.content?.length > 120
+                            ? post.content.slice(0, 120) + "..."
+                            : post.content,
+                      }}
+                    ></p>
+
+                    {post.picture && (
+                      <div className="relative w-full h-48 mb-3 rounded-md overflow-hidden">
+                        <Image
+                          src={post.picture}
+                          alt="Post image"
+                          fill
+                          className="object-cover"
+                        />
                       </div>
                     )}
-                  </div>
-                  <p
-                    className="text-sm mb-3 leading-relaxed"
-                    dangerouslySetInnerHTML={{
-                      __html:
-                        post.content?.length > 120
-                          ? post.content.slice(0, 120) + "..."
-                          : post.content,
-                    }}
-                  ></p>
 
-                  {post.picture && (
-                    <div className="relative w-full h-48 mb-3 rounded-md overflow-hidden">
-                      <Image
-                        src={post.picture}
-                        alt="Post image"
-                        fill
-                        className="object-cover"
-                      />
+                    <div className="flex items-center gap-1.5 text-sm">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      <span>{post.likes} likes</span>
                     </div>
-                  )}
-                  <div className="flex items-center gap-1.5 text-sm">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <span>{post.likes} likes</span>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
