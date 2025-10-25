@@ -6,14 +6,14 @@ export async function GET(req: Request) {
   await register();
 
   const { searchParams } = new URL(req.url);
-  const username = searchParams.get("username");
+  const objectId = searchParams.get("objectId");
 
-  if (!username) {
-    return NextResponse.json({ error: "Username is required" }, { status: 400 });
+  if (!objectId) {
+    return NextResponse.json({ error: "User ID is required" }, { status: 400 });
   }
 
   try {
-    const user = await User.findOne({username});
+    const user = await User.findById(objectId).lean();
     if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     return NextResponse.json({ user });

@@ -122,7 +122,9 @@ export default function PostPage() {
 
       setIsLiked(!isLiked);
       setPost((prev) =>
-        prev ? { ...prev, likes: isLiked ? prev.likes - 1 : prev.likes + 1 } : null
+        prev
+          ? { ...prev, likes: isLiked ? prev.likes - 1 : prev.likes + 1 }
+          : null
       );
     } catch (err) {
       console.error(err);
@@ -283,12 +285,14 @@ export default function PostPage() {
   const renderComment = (comment: Comment, level: number = 0) => (
     <div
       key={comment._id}
-      className={`${level > 0 ? "ml-8 mt-4" : "mt-6"} border-l-2 border-gray-200 pl-4`}
+      className={`${
+        level > 0 ? "ml-8 mt-4" : "mt-6"
+      } border-l-2 border-gray-200 pl-4`}
     >
       <div className="flex items-start gap-3">
         <div
           className="flex-shrink-0 cursor-pointer"
-          onClick={() => router.push(`/user/${comment.author._id}`)}
+          onClick={() => router.push(`/user/${comment.author.username}`)}
         >
           {comment.author.profilePicture ? (
             <div className="relative w-10 h-10">
@@ -400,7 +404,7 @@ export default function PostPage() {
           <div className="mb-6">
             <div
               className="flex items-center gap-3 mb-4 cursor-pointer"
-              onClick={() => router.push(`/user/${post.author._id}`)}
+              onClick={() => router.push(`/user/${post.author.username}`)}
             >
               {post.author.profilePicture ? (
                 <div className="relative w-12 h-12">

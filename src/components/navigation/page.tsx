@@ -35,7 +35,7 @@ export default function Navigation() {
   const icons = [
     { name: Home, url: "dashboard", title: "Home" },
     { name: Bookmark, url: "bookmark", title: "Bookmarks" },
-    { name: Heart, url: "likes", title: "Likes" },
+    // { name: Heart, url: "likes", title: "Likes" },
     // { name: Settings, url: "settings" },
     { name: User, url: "account", title: "Account" },
   ];

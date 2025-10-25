@@ -53,14 +53,14 @@ export default function UserProfile() {
   }, []);
 
   useEffect(() => {
-    if (userId) {
+    if (userId && firebaseUser) {
       fetchUserData(userId);
     }
-  }, [userId]);
+  }, [firebaseUser, userId]);
 
-  const fetchUserData = async (objectId: string) => {
+  const fetchUserData = async (username: string) => {
     try {
-      const userRes = await fetch(`/api/getUser?objectId=${encodeURIComponent(objectId)}`);
+      const userRes = await fetch(`/api/getUser?username=${username}`);
         const userData = await userRes.json();
         console.log(userData.user);
       if (!userRes.ok) throw new Error(userData.error || "Failed to load user profile");

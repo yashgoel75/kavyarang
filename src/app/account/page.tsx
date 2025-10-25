@@ -110,10 +110,9 @@ export default function Account() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to update user");
 
-      // FIXED: Preserve the posts array when updating user data
       setUserData((prev) => ({
         ...data.user,
-        posts: prev?.posts || [], // Keep existing posts
+        posts: prev?.posts || [],
       }));
 
       setIsEdit(false);
@@ -592,7 +591,7 @@ export default function Account() {
                     {userData.following?.length || 0}
                   </h3>
                   <p>
-                    {userData.followers?.length == 1
+                    {userData.following?.length == 1
                       ? "following"
                       : "followings"}
                   </p>

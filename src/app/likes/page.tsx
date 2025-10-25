@@ -97,7 +97,7 @@ export default function Likes() {
         posts.map(async (post) => {
           try {
             const authorRes = await fetch(
-              `/api/getUser?objectId=${post.author}`
+              `/api/getUserByObjectId?objectId=${post.author}`
             );
             if (authorRes.ok) {
               const authorData = await authorRes.json();
@@ -218,7 +218,7 @@ export default function Likes() {
                   <div className="flex items-center justify-between mb-3">
                     <div
                       className="flex items-center gap-3 cursor-pointer"
-                      onClick={() => router.push(`/user/${userData?._id}`)}
+                      onClick={() => router.push(`/user/${userData?.username}`)}
                     >
                       {post.author.profilePicture ? (
                         <Image
