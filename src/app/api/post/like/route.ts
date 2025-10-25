@@ -25,13 +25,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 
-    const hasLiked = user.posts?.includes(postId);
+    const hasLiked = user.likes?.includes(postId);
 
     if (hasLiked) {
-      await User.updateOne({ email }, { $pull: { posts: postId } });
+      await User.updateOne({ email }, { $pull: { likes: postId } });
       post.likes = Math.max(0, post.likes - 1);
     } else {
-      await User.updateOne({ email }, { $addToSet: { posts: postId } });
+      await User.updateOne({ email }, { $addToSet: { likes: postId } });
       post.likes += 1;
     }
 

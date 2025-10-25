@@ -578,13 +578,19 @@ export default function Account() {
                   <h3 className="text-2xl font-semibold text-gray-800">
                     {userData.followers?.length || 0}
                   </h3>
-                  <p>{userData.followers?.length == 1 ? "follower" : "followers"}</p>
+                  <p>
+                    {userData.followers?.length == 1 ? "follower" : "followers"}
+                  </p>
                 </div>
                 <div className="text-center">
                   <h3 className="text-2xl font-semibold text-gray-800">
                     {userData.following?.length || 0}
                   </h3>
-                  <p>{userData.followers?.length == 1 ? "following" : "followings"}</p>
+                  <p>
+                    {userData.followers?.length == 1
+                      ? "following"
+                      : "followings"}
+                  </p>
                 </div>
               </div>
             </div>

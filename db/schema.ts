@@ -35,6 +35,7 @@ const UserSchema = new Schema({
     snapchat: String,
     followers: [String],
     following: [String],
+    likes: [String],
 }, { timestamps: true });
 
 export const User = mongoose.models.User || mongoose.model("User", UserSchema);
