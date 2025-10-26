@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const post = await Post.findById(postId);
+    const post = await Post.findById(postId).populate("author");
     if (!post) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
@@ -33,6 +33,22 @@ export async function POST(req: NextRequest) {
     } else {
       await User.updateOne({ email }, { $addToSet: { likes: postId } });
       post.likes += 1;
+
+      if (post.author.email !== email) {
+        const notification = {
+          id: new Date().getTime().toString(),
+          type: "post_like",
+          fromEmail: email,
+          postId: post._id,
+          read: false,
+          createdAt: new Date(),
+        };
+
+        await User.updateOne(
+          { email: post.author.email },
+          { $push: { notifications: notification } }
+        );
+      }
     }
 
     await post.save();

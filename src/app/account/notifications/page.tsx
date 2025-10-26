@@ -11,8 +11,9 @@ import Image from "next/image";
 
 interface Notification {
   id: string;
-  type: "new_follower";
+  type: "new_follower" | "post_like";
   fromEmail: string;
+  postId?: string;
   createdAt: string;
   read: boolean;
   fromUser?: { name: string; username: string; profilePicture?: string };
@@ -38,17 +39,18 @@ export default function NotificationsPage() {
 
   const fetchNotifications = async (email: string) => {
     try {
-      const res = await fetch(`/api/notifications?email=${encodeURIComponent(email)}`);
+      const res = await fetch(
+        `/api/notifications?email=${encodeURIComponent(email)}`
+      );
       const data = await res.json();
 
       const notificationsWithUser = await Promise.all(
         data.notifications.map(async (notif: Notification) => {
-          if (notif.type === "new_follower") {
-            const userRes = await fetch(`/api/getUserByEmail?email=${encodeURIComponent(notif.fromEmail)}`);
-            const userData = await userRes.json();
-            return { ...notif, fromUser: userData.user };
-          }
-          return notif;
+          const userRes = await fetch(
+            `/api/getUserByEmail?email=${encodeURIComponent(notif.fromEmail)}`
+          );
+          const userData = await userRes.json();
+          return { ...notif, fromUser: userData.user };
         })
       );
 
@@ -60,10 +62,37 @@ export default function NotificationsPage() {
         body: JSON.stringify({ email }),
       });
     } catch (err) {
-      console.error(err);
+      console.error("Error fetching notifications:", err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleNotificationClick = (notif: Notification) => {
+    if (notif.type === "new_follower" && notif.fromUser) {
+      router.push(`/user/${notif.fromUser.username}`);
+    } else if (notif.type === "post_like" && notif.postId) {
+      router.push(`/post/${notif.postId}`);
+    }
+  };
+
+  const renderNotificationText = (notif: Notification) => {
+    if (notif.type === "new_follower") {
+      return (
+        <p className="text-gray-700">
+          <span className="font-medium">{notif.fromUser?.name}</span> started
+          following you
+        </p>
+      );
+    } else if (notif.type === "post_like") {
+      return (
+        <p className="text-gray-700">
+          <span className="font-medium">{notif.fromUser?.name}</span> liked your
+          post
+        </p>
+      );
+    }
+    return null;
   };
 
   return (
@@ -75,14 +104,16 @@ export default function NotificationsPage() {
         {loading ? (
           <p className="text-center mt-20">Loading notifications...</p>
         ) : notifications.length === 0 ? (
-          <p className="text-center mt-20 text-gray-500">No new notifications</p>
+          <p className="text-center mt-20 text-gray-500">
+            No new notifications
+          </p>
         ) : (
           <div className="space-y-4">
             {notifications.map((notif) => (
               <div
                 key={notif.id}
                 className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm hover:bg-gray-50 transition cursor-pointer"
-                onClick={() => router.push(`/user/${notif.fromUser?.username}`)}
+                onClick={() => handleNotificationClick(notif)}
               >
                 <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center text-white font-medium">
                   {notif.fromUser?.profilePicture ? (
@@ -98,10 +129,10 @@ export default function NotificationsPage() {
                   )}
                 </div>
                 <div>
-                  <p className="text-gray-700">
-                    <span className="font-medium">{notif.fromUser?.name}</span> started following you
+                  {renderNotificationText(notif)}
+                  <p className="text-xs text-gray-500">
+                    {new Date(notif.createdAt).toLocaleString()}
                   </p>
-                  <p className="text-xs text-gray-500">{new Date(notif.createdAt).toLocaleString()}</p>
                 </div>
               </div>
             ))}
