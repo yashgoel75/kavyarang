@@ -57,7 +57,7 @@ export default function Header() {
 
   const handleSearch = () => {
     if (searchQuery.trim() === "") return;
-    router.push(`/dashboard?query=${encodeURIComponent(searchQuery.trim())}`);
+    router.push(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
   };
 
   useEffect(() => {
