@@ -10,10 +10,6 @@ interface Notification {
   createdAt: Date;
 }
 
-interface UserType {
-  notifications?: Notification[];
-}
-
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const { email } = body;
@@ -29,12 +25,7 @@ export async function POST(req: NextRequest) {
     if (!user) 
       return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-    const updatedNotifications = (user.notifications || []).map((n: Notification) => ({
-      ...n,
-      read: true,
-    }));
-
-    await User.updateOne({ email }, { $set: { notifications: updatedNotifications } });
+    await User.updateOne({ email }, { $set: { notifications: [] } });
 
     return NextResponse.json({ success: true });
   } catch (err) {

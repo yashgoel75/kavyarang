@@ -54,7 +54,6 @@ export default function NotificationsPage() {
 
       setNotifications(notificationsWithUser);
 
-      // Mark all as read
       await fetch(`/api/notifications/mark-read`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
