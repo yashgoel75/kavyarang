@@ -114,7 +114,8 @@ export default function FriendsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: firebaseUser.email,
-          followEmail: friendEmail,
+          targetEmail: friendEmail,
+          action: "follow",
         }),
       });
       const data = await res.json();
