@@ -178,6 +178,33 @@ export default function Dashboard() {
     }
   };
 
+  function getTextColor(bgColor: string): string {
+    if (!bgColor) return "#000000";
+
+    const hex = bgColor.replace("#", "");
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+
+    const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    return luminance > 150 ? "#000000" : "#ffffff";
+  }
+
+  function getIconColor(bgColor: string, isLiked: boolean): string {
+    const hex = bgColor.replace("#", "");
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+
+    const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+    if (isLiked) {
+      return luminance < 120 ? "#ffdfdfff" : "#e11d48";
+    }
+
+    return luminance < 120 ? "#f1f1f1" : "#555555";
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
@@ -240,18 +267,26 @@ export default function Dashboard() {
                     </div>
                     <div className="text-xs text-gray-500 mt-1">Posts</div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-800">
-                      {userData.followers?.length || 0}
+                  <Link href="/account">
+                    <div className="text-center cursor-pointer">
+                      <div className="text-2xl font-bold text-gray-800">
+                        {userData.followers?.length || 0}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Followers
+                      </div>
                     </div>
-                    <div className="text-xs text-gray-500 mt-1">Followers</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-800">
-                      {userData.following?.length || 0}
+                  </Link>
+                  <Link href="/account">
+                    <div className="text-center cursor-pointer">
+                      <div className="text-2xl font-bold text-gray-800">
+                        {userData.following?.length || 0}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Following
+                      </div>
                     </div>
-                    <div className="text-xs text-gray-500 mt-1">Following</div>
-                  </div>
+                  </Link>
                 </div>
 
                 {(userData.instagram || userData.snapchat) && (
@@ -295,13 +330,13 @@ export default function Dashboard() {
                   </div>
                 )}
 
-                <Link href="/account">
-                  <div className="px-6 mt-25 cursor-pointer">
+                <div className="px-6 mt-25">
+                  <Link href="/account">
                     <button className="cursor-pointer w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all font-medium">
                       View Profile
                     </button>
-                  </div>
-                </Link>
+                  </Link>
+                </div>
               </div>
             ) : (
               <div className="flex items-center justify-center h-full text-gray-500">
@@ -341,53 +376,73 @@ export default function Dashboard() {
                 posts.map((post) => (
                   <div
                     key={post._id}
+                    style={{
+                      backgroundColor: post.color || "#ffffff",
+                      color: getTextColor(post.color || "#ffffff"),
+                    }}
                     className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group flex flex-col"
                   >
                     {post.picture && (
-                      <div className="relative overflow-hidden h-56">
-                        <img
-                          src={post.picture}
-                          alt={post.title}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                      </div>
+                      <Link href={`/post/${post._id}`}>
+                        <div className="relative overflow-hidden h-56 cursor-pointer">
+                          <img
+                            src={post.picture}
+                            alt={post.title}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        </div>
+                      </Link>
                     )}
 
                     <div className="flex flex-col flex-grow p-5">
-                      <h2 className="font-bold text-xl text-gray-800 mb-2 line-clamp-1">
-                        {post.title}
-                      </h2>
-                      <p
-                        className="text-sm text-gray-600 leading-relaxed line-clamp-3 mb-4 flex-grow"
-                        dangerouslySetInnerHTML={{
-                          __html:
-                            post.content?.length > 120
-                              ? post.content.slice(0, 120) + "..."
-                              : post.content,
-                        }}
-                      ></p>
+                      <Link href={`/post/${post._id}`}>
+                        <h2 className="font-bold text-xl   mb-2 line-clamp-1">
+                          {post.title}
+                        </h2>
+                        <p
+                          className="text-sm leading-relaxed line-clamp-3 mb-4 flex-grow"
+                          dangerouslySetInnerHTML={{
+                            __html:
+                              post.content?.length > 120
+                                ? post.content.slice(0, 120) + "..."
+                                : post.content,
+                          }}
+                        ></p>
+                      </Link>
 
                       <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-auto">
                         <div className="flex gap-3 items-center">
                           <button
                             onClick={() => handleLike(post._id)}
                             disabled={!firebaseUser}
-                            className={`flex items-center gap-2 transition-transform hover:scale-110 disabled:cursor-not-allowed ${
-                              likedPosts[post._id]
-                                ? "text-red-500"
-                                : "text-gray-500"
-                            }`}
+                            className={`flex items-center gap-2 transition-transform hover:scale-110 disabled:cursor-not-allowed`}
+                            style={{
+                              color: getIconColor(
+                                post.color || "#ffffff",
+                                likedPosts[post._id]
+                              ),
+                              textShadow:
+                                getTextColor(post.color || "#ffffff") ===
+                                "#ffffff"
+                                  ? "0 0 4px rgba(0,0,0,0.4)"
+                                  : "0 0 4px rgba(255,255,255,0.4)",
+                            }}
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               viewBox="0 0 20 20"
                               fill={
-                                likedPosts[post._id] ? "currentColor" : "none"
+                                likedPosts[post._id]
+                                  ? getIconColor(post.color || "#ffffff", true)
+                                  : "none"
                               }
-                              stroke="currentColor"
+                              stroke={getIconColor(
+                                post.color || "#ffffff",
+                                likedPosts[post._id]
+                              )}
                               strokeWidth="1.5"
-                              className="h-5 w-5"
+                              className="h-5 w-5 transition-all duration-200"
                             >
                               <path
                                 fillRule="evenodd"
@@ -425,8 +480,8 @@ export default function Dashboard() {
                         </div>
 
                         <Link href={`/post/${post._id}`}>
-                          <button className="cursor-pointer text-sm text-blue-500 hover:text-blue-600 font-medium">
-                            View Post
+                          <button className="cursor-pointer text-sm font-medium">
+                            Tap to Comment
                           </button>
                         </Link>
                       </div>
