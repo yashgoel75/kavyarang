@@ -11,6 +11,7 @@ import { useParams, useRouter } from "next/navigation";
 
 import snapchat from "../../../../public/snapchat.png";
 import instagram from "../../../../public/instagram.png";
+import Link from "next/link";
 
 interface User {
   name: string;
@@ -277,7 +278,8 @@ export default function UserProfile() {
                 )}
               </div>
               <div className="flex gap-4 justify-around bg-gray-50 md:flex-col md:space-y-4 md:mt-3 px-3 py-5 rounded-lg shadow-xl">
-                <div className="text-center">
+                <Link href={`/user/${userId}/friends`}>
+                <div className="text-center cursor-pointer">
                   <h3 className="text-2xl font-semibold text-gray-800">
                     {userData.followers?.length || 0}
                   </h3>
@@ -286,8 +288,10 @@ export default function UserProfile() {
                       ? "follower"
                       : "followers"}
                   </p>
-                </div>
-                <div className="text-center">
+                  </div>
+                </Link>
+                <Link href={`/user/${userId}/friends`}>
+                <div className="text-center cursor-pointer">
                   <h3 className="text-2xl font-semibold text-gray-800">
                     {userData.following?.length || 0}
                   </h3>
@@ -296,7 +300,8 @@ export default function UserProfile() {
                       ? "following"
                       : "followings"}
                   </p>
-                </div>
+                  </div>
+                  </Link>
               </div>
             </div>
           </div>
