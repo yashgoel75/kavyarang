@@ -196,7 +196,7 @@ export default function Bookmarks() {
 
         {postsWithAuthors.length === 0 ? (
           <p className="text-center text-gray-500">
-            You haven't bookmarked any posts yet.
+            You haven&rsquo;t bookmarked any posts yet.
           </p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -384,7 +384,7 @@ export default function Account() {
                   <p className="text-gray-600 text-sm">{userData.email}</p>
                   {userData.bio && (
                     <div className="mt-4 pt-4 border-t border-gray-100">
-                      <p className="text-gray-700 italic">"{userData.bio}"</p>
+                      <p className="text-gray-700 italic">&apos;{userData.bio}&apos;</p>
                     </div>
                   )}
                   <button

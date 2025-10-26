@@ -4,29 +4,58 @@ import Header from "@/components/header/page";
 import Navigation from "@/components/navigation/page";
 import Footer from "@/components/footer/page";
 import { useState, useEffect } from "react";
-import { getAuth, signOut, onAuthStateChanged, User } from "firebase/auth";
+import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
+import { Menu, X } from "lucide-react";
+import Image from "next/image";
+import snapchat from "../../../public/snapchat.png";
+import instagram from "../../../public/instagram.png";
+import Link from "next/link";
 
 interface Post {
   _id: string;
   title: string;
   content: string;
   picture?: string;
+  author: User;
   likes: number;
   color: string;
 }
 
+interface User {
+  name: string;
+  username: string;
+  email: string;
+  bio?: string;
+  profilePicture?: string;
+  posts?: Post[];
+  snapchat: string;
+  instagram: string;
+  followers: string[];
+  following: string[];
+}
+
 export default function Dashboard() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
-  const [displayName, setDisplayName] = useState("");
+  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [userData, setUserData] = useState<User | null>(null);
+  const [posts, setPosts] = useState<Post[] | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
+  const [likedPosts, setLikedPosts] = useState<Record<string, boolean>>({});
+  const [bookmarkedPosts, setBookmarkedPosts] = useState<
+    Record<string, boolean>
+  >({});
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       if (user?.email) {
-        fetchUserName(user.email);
+        fetchUserData(user.email);
+        setFirebaseUser(user);
       } else {
         router.replace("/");
       }
@@ -34,69 +63,388 @@ export default function Dashboard() {
     return () => unsubscribe();
   }, []);
 
-  const fetchUserName = async (email: string) => {
+  const fetchUserData = async (email: string) => {
     try {
-      // const token = await getFirebaseToken();
-      const response = await fetch(
-        `/api/user?email=${encodeURIComponent(email)}`,
-        {
-          headers: {
-            // Authorization: `Bearer ${token}`,
-          },
-        }
+      const res = await fetch(
+        `/api/user/posts?email=${encodeURIComponent(email)}`
       );
-      const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.error || "Failed to fetch user name");
-      setDisplayName(data.name);
-      console.log("Fetched user name:", data.name);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to load user data");
+      setUserData(data.user);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const [posts, setPosts] = useState<Post[] | null>();
-
   useEffect(() => {
+    if (!userData) return;
+
     const fetchPosts = async () => {
       try {
         const res = await fetch(`/api/getPosts`);
         const data = await res.json();
         const filteredPosts = data.posts.filter((post: Post) => {
-          return post.picture != null;
+          return post.author.email != userData?.email;
         });
-        console.log(filteredPosts);
         setPosts(filteredPosts);
-      } catch (error: unknown) {
+      } catch (error) {
         console.log(error);
       }
     };
     fetchPosts();
-  }, []);
+  }, [userData]);
+
+  useEffect(() => {
+    if (!firebaseUser || !posts?.length) return;
+
+    const fetchInteractions = async () => {
+      try {
+        const postIds = posts.map((p) => p._id);
+
+        const res = await fetch(
+          `/api/interactions?email=${encodeURIComponent(
+            firebaseUser.email!
+          )}&postIds=${encodeURIComponent(JSON.stringify(postIds))}`
+        );
+
+        const data = await res.json();
+
+        if (res.ok) {
+          const likedMap: Record<string, boolean> = {};
+          const bookmarkedMap: Record<string, boolean> = {};
+
+          data.likes.forEach((id: string) => {
+            likedMap[id] = true;
+          });
+
+          data.bookmarks.forEach((id: string) => {
+            bookmarkedMap[id] = true;
+          });
+
+          setLikedPosts(likedMap);
+          setBookmarkedPosts(bookmarkedMap);
+        }
+      } catch (err) {
+        console.error("Failed to load interactions", err);
+      }
+    };
+
+    fetchInteractions();
+  }, [firebaseUser, posts]);
+
+  const handleLike = async (postId: string) => {
+    if (!firebaseUser) return;
+
+    try {
+      const res = await fetch(`/api/post/like`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ postId, email: firebaseUser.email }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to like post");
+
+      setLikedPosts((prev) => ({ ...prev, [postId]: !prev[postId] }));
+
+      setPosts((prev) =>
+        prev
+          ? prev.map((p) =>
+              p._id === postId ? { ...p, likes: data.likes } : p
+            )
+          : prev
+      );
+    } catch (err) {
+      console.error("Error liking post:", err);
+    }
+  };
+
+  const handleBookmark = async (postId: string) => {
+    if (!firebaseUser) return;
+    try {
+      const res = await fetch(`/api/post/bookmark`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ postId, email: firebaseUser.email }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to bookmark post");
+
+      setBookmarkedPosts((prev) => ({ ...prev, [postId]: !prev[postId] }));
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
-    <>
-      <div className="min-h-screen flex flex-col">
-        <Header />
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <Header />
 
-        <div className="flex flex-1 relative">
-          <div className="absolute left-0 h-[calc(100vh-7rem)] my-1 w-[300px] border-r border-gray-200 p-4">
-            <div className="h-[15rem] border"></div>
-            <div>
-              <div className="w-full flex-1 flex mt-5 justify-center items-center px-5 py-2 rounded-lg bg-gray-100 space-y-5 gap-5">Feed</div>
-              <div className="w-full flex-1 flex mt-5 justify-center items-center px-5 py-2 rounded-lg bg-gray-100 space-y-5 gap-5">Create Post</div>
-              <div className="border-b mt-5"></div>
-              <div className="h-[15rem] border mt-2"></div>
+      <div className="flex flex-1 relative">
+        <aside
+          className={`fixed md:static top-16 left-0 z-40 h-[calc(100vh-4rem)] bg-white border-r border-gray-200 shadow-lg
+          transform transition-transform duration-300 ease-in-out
+          ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+          } 
+          w-80 overflow-hidden`}
+        >
+          <div className="h-full flex flex-col">
+            <button
+              className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full md:hidden z-10"
+              onClick={() => setSidebarOpen(false)}
+            >
+              <X size={20} />
+            </button>
+
+            {loading ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+              </div>
+            ) : userData ? (
+              <div className="flex flex-col h-full">
+                <div className="relative">
+                  <div className="h-32 bg-white"></div>
+                  <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2">
+                    <img
+                      src={
+                        userData.profilePicture ||
+                        `https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.email}`
+                      }
+                      alt={userData.name}
+                      className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover bg-white"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-20 px-6 pb-4 text-center border-b border-gray-100">
+                  <h2 className="text-2xl font-bold text-gray-800">
+                    {userData.name}
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    @{userData.username}
+                  </p>
+                  {userData.bio && (
+                    <p className="text-sm text-gray-600 mt-3 leading-relaxed">
+                      {userData.bio}
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 px-6 py-4 border-b border-gray-100">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-800">
+                      {userData.posts?.length || 0}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">Posts</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-800">
+                      {userData.followers?.length || 0}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">Followers</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-800">
+                      {userData.following?.length || 0}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">Following</div>
+                  </div>
+                </div>
+
+                {(userData.instagram || userData.snapchat) && (
+                  <div className="px-6 py-4 space-y-3">
+                    {userData.instagram && (
+                      <a
+                        href={`https://instagram.com/${userData.instagram}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 px-5 py-2 rounded-xl bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 text-white shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1"
+                      >
+                        <Image
+                          src={instagram}
+                          width={25}
+                          height={25}
+                          alt="Instagram"
+                        />
+                        <span className="font-medium truncate">
+                          {userData.instagram}
+                        </span>
+                      </a>
+                    )}
+                    {userData.snapchat && (
+                      <a
+                        href={`https://snapchat.com/add/${userData.snapchat}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 px-5 py-2 rounded-xl bg-[#f5ec00] text-black shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1"
+                      >
+                        <Image
+                          src={snapchat}
+                          width={25}
+                          height={25}
+                          alt="Snapchat"
+                        />
+                        <span className="font-medium truncate">
+                          {userData.snapchat}
+                        </span>
+                      </a>
+                    )}
+                  </div>
+                )}
+
+                <Link href="/account">
+                  <div className="px-6 mt-25 cursor-pointer">
+                    <button className="cursor-pointer w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all font-medium">
+                      View Profile
+                    </button>
+                  </div>
+                </Link>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center h-full text-gray-500">
+                Failed to load profile
+              </div>
+            )}
+          </div>
+        </aside>
+
+        <button
+          className="fixed top-20 left-4 z-50 p-3 bg-white rounded-full shadow-lg md:hidden hover:bg-gray-50 transition-all"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+        >
+          <Menu size={22} className="text-gray-700" />
+        </button>
+
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+            onClick={() => setSidebarOpen(false)}
+          ></div>
+        )}
+
+        <main className="flex-1 h-[calc(100vh-4rem)] overflow-y-auto md:ml-0 pb-20">
+          <div className="max-w-6xl mx-auto p-6">
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-800 mb-2">
+                Welcome back, {userData?.name || "User"} 👋
+              </h1>
+              <p className="text-gray-600">
+                Discover amazing content from the community
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {posts?.length ? (
+                posts.map((post) => (
+                  <div
+                    key={post._id}
+                    className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group flex flex-col"
+                  >
+                    {post.picture && (
+                      <div className="relative overflow-hidden h-56">
+                        <img
+                          src={post.picture}
+                          alt={post.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                      </div>
+                    )}
+
+                    <div className="flex flex-col flex-grow p-5">
+                      <h2 className="font-bold text-xl text-gray-800 mb-2 line-clamp-1">
+                        {post.title}
+                      </h2>
+                      <p
+                        className="text-sm text-gray-600 leading-relaxed line-clamp-3 mb-4 flex-grow"
+                        dangerouslySetInnerHTML={{
+                          __html:
+                            post.content?.length > 120
+                              ? post.content.slice(0, 120) + "..."
+                              : post.content,
+                        }}
+                      ></p>
+
+                      <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-auto">
+                        <div className="flex gap-3 items-center">
+                          <button
+                            onClick={() => handleLike(post._id)}
+                            disabled={!firebaseUser}
+                            className={`flex items-center gap-2 transition-transform hover:scale-110 disabled:cursor-not-allowed ${
+                              likedPosts[post._id]
+                                ? "text-red-500"
+                                : "text-gray-500"
+                            }`}
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 20 20"
+                              fill={
+                                likedPosts[post._id] ? "currentColor" : "none"
+                              }
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              className="h-5 w-5"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            <span className="text-sm font-semibold">
+                              {post.likes}
+                            </span>
+                          </button>
+
+                          <button
+                            onClick={() => handleBookmark(post._id)}
+                            disabled={!firebaseUser}
+                            className={`flex items-center gap-2 hover:scale-110 transition-transform disabled:cursor-not-allowed ${
+                              bookmarkedPosts[post._id] ? "text-yellow-500" : ""
+                            }`}
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4"
+                              viewBox="0 0 20 20"
+                              fill={
+                                bookmarkedPosts[post._id]
+                                  ? "currentColor"
+                                  : "none"
+                              }
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                            >
+                              <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+                            </svg>
+                          </button>
+                        </div>
+
+                        <Link href={`/post/${post._id}`}>
+                          <button className="cursor-pointer text-sm text-blue-500 hover:text-blue-600 font-medium">
+                            View Post
+                          </button>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-full flex flex-col items-center justify-center py-20">
+                  <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mb-4"></div>
+                  <p className="text-gray-500">Loading posts...</p>
+                </div>
+              )}
             </div>
           </div>
-
-          <div className="flex-1 h-[calc(100vh-7rem)] overflow-scroll overscroll-contain ml-[300px] p-4">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae sint pariatur explicabo atque enim nemo architecto doloremque blanditiis dolore ullam natus placeat ab repudiandae quas, mollitia aliquam rerum deleniti aspernatur magni, vitae cumque minima quis? Amet reiciendis alias debitis repudiandae incidunt doloribus, repellat magnam hic odio quibusdam veritatis, quos id unde, molestias dolor neque eaque sunt provident quaerat. Repellat, magni. Quidem quae at molestias amet ab minus esse, ipsum dolorum hic deserunt! Praesentium, ipsa minus quidem delectus officiis in nobis quaerat amet esse quod, rem assumenda minima, asperiores sapiente magnam porro. Laboriosam iste quod commodi porro id vero repellendus neque nihil harum cupiditate laudantium consectetur eum dicta, doloremque unde voluptas tenetur et quas minima doloribus fugit? Aspernatur odio ut neque sint tempore sit hic ullam incidunt nemo, natus cumque ducimus non mollitia numquam quaerat, unde nesciunt modi iste officiis eius aliquid voluptate ipsam. Ipsam dolores quisquam blanditiis harum aperiam vitae esse sunt, tempora rerum. Error accusamus, quod corrupti consequatur dicta quos praesentium, vero earum aperiam distinctio, temporibus necessitatibus! Sunt, deserunt at. Tempore earum consequatur facilis ipsum cum ea veniam deleniti ipsa blanditiis praesentium fugiat, quas, quidem laboriosam doloribus quibusdam sit cumque nesciunt asperiores necessitatibus voluptatibus, excepturi reprehenderit aliquid eaque! Culpa, molestias! Assumenda ipsam unde quasi quaerat sapiente pariatur sed quis facilis numquam laudantium? Maxime veritatis ea laboriosam sunt illo! Sapiente est assumenda obcaecati itaque perferendis molestiae vel! Placeat, dignissimos provident. Ut libero vero praesentium voluptatibus harum perspiciatis optio voluptatem blanditiis sequi doloribus! Itaque excepturi iste nam reprehenderit consequatur sit natus beatae, autem, architecto placeat minima quod quaerat inventore voluptatibus suscipit dolores harum quo repudiandae dolore eius explicabo. Doloribus eveniet, ad corrupti excepturi qui enim optio perferendis ex mollitia dignissimos suscipit beatae debitis, explicabo quis omnis ipsam officiis! Enim architecto numquam explicabo, libero aliquid sit omnis vero dolores alias fugiat nisi incidunt excepturi ex obcaecati laboriosam cumque? Itaque est rem quidem ab dignissimos nostrum ut, voluptas reprehenderit, enim suscipit distinctio voluptatem fuga rerum culpa quam quia? Voluptate explicabo asperiores necessitatibus voluptatibus deserunt dolorem, suscipit quo unde, possimus laborum nihil doloribus, totam omnis temporibus. Odio dolore corrupti aperiam porro? Odit, distinctio veritatis corporis velit, obcaecati beatae quis impedit, ut officiis porro quaerat ea. Voluptas laudantium omnis sed mollitia temporibus numquam expedita iure labore quam, corrupti et reiciendis eligendi, adipisci deserunt sapiente optio molestias ipsa veniam accusantium id placeat voluptatibus, ratione distinctio dicta. Quidem aut tenetur consequuntur at minima asperiores adipisci, mollitia facilis sequi dolorem incidunt ducimus quae consequatur harum laborum neque nulla ex tempora voluptatum excepturi blanditiis voluptatem? Repudiandae odio soluta corporis! Rem animi vel nostrum sit qui praesentium incidunt, repellendus vitae ea laudantium voluptas distinctio modi porro, impedit necessitatibus corporis sapiente earum veniam nihil labore nulla architecto. Voluptas iusto nesciunt commodi. Ullam omnis expedita obcaecati quisquam quas, nam ex doloribus sed exercitationem quaerat maiores assumenda unde adipisci magni iste autem est voluptatibus commodi facilis repellendus illo id vero! Iusto inventore corporis sequi quidem vero optio quod sed nihil deleniti, quibusdam quae nemo totam consequatur beatae adipisci voluptatibus minima! Dolor, eligendi libero laboriosam praesentium sit quaerat doloremque asperiores, ipsum maiores recusandae veritatis quasi eos non at minima omnis quisquam hic perferendis amet velit officia molestiae nemo deserunt. Aspernatur expedita incidunt totam iure sed in tempore illum ullam odio praesentium odit magnam eveniet cum explicabo ratione porro hic voluptate provident ipsam nostrum id, commodi sapiente. Aliquam, molestiae vitae officiis autem illo fugiat fuga facilis, accusamus omnis animi aut quod perferendis dolores. Quaerat enim culpa dignissimos sit eum? Sit et ut ducimus dolorum, consequuntur sunt corrupti labore itaque quo quidem repellat nostrum nulla laudantium officiis iusto doloribus vel praesentium qui cupiditate quas suscipit cum. Nisi, sunt pariatur aperiam architecto incidunt aliquam minus obcaecati vel recusandae minima sed ad, totam non, voluptates necessitatibus distinctio cupiditate doloribus placeat rerum hic. Facilis, corporis nobis nihil hic eum autem aliquid minus eos voluptates, distinctio dolore incidunt id libero cum et magnam voluptatem quas nulla cupiditate fugiat aperiam maxime! Unde tenetur natus nostrum dolores perspiciatis? Soluta id accusamus rerum ducimus enim. Odit esse dolorum mollitia ullam modi reiciendis molestiae! Dolore id placeat voluptatem libero modi eius aliquam laborum quaerat aliquid ducimus veritatis totam quasi ipsam repudiandae distinctio, rerum repellat laudantium. Ut accusantium dolor ex quis officia, atque ipsum recusandae perspiciatis temporibus odit nihil porro ad cumque dolorum illo culpa necessitatibus dicta quibusdam dignissimos quae delectus accusamus eveniet! Magnam eligendi ratione velit a et? Quis ullam labore voluptas saepe qui molestiae possimus porro eum tenetur nesciunt? Odio eos dolor ullam delectus error deserunt facilis impedit, et necessitatibus in dignissimos sunt modi id mollitia placeat voluptatem qui maiores totam alias. Commodi architecto, voluptatum laborum doloremque quis assumenda alias, maiores consectetur natus mollitia dolore quam delectus molestiae provident magnam non, harum odio? Ratione, unde. Quae voluptatem ducimus mollitia sapiente in voluptate quis reprehenderit repellat? Maxime quibusdam facere mollitia saepe quasi provident officia, ea voluptate! Voluptas rerum quidem eos quasi debitis illo necessitatibus aliquid? Voluptate, iure! Soluta vero magni neque. Consequatur, placeat eum. Ad autem modi, soluta obcaecati in aliquam, amet aperiam id reprehenderit doloribus doloremque repudiandae nemo eum optio voluptate laudantium. Quisquam quis animi, nihil commodi aperiam quam nisi facere iusto alias! Consequatur corporis velit fugit incidunt voluptatem laudantium eaque laborum perspiciatis! Quo, nisi quisquam! Ea nam et tempora asperiores nulla recusandae, omnis, id facere, architecto alias laborum iste similique. Saepe eius unde placeat mollitia, maxime inventore odio illo similique! Magnam, eligendi dicta aut nobis, qui officiis optio dolorem assumenda dolor atque ad voluptates, eum rerum facilis. Et facilis cum cupiditate vitae aspernatur eligendi repellat iusto omnis laudantium quaerat, asperiores debitis. Animi aspernatur tenetur natus corporis aut quaerat dignissimos, quod, aliquam numquam ducimus doloribus blanditiis itaque quia debitis excepturi a! Culpa, animi consequuntur totam molestiae, vero aperiam, sapiente a esse odio sint delectus quis. Maiores quos, earum, odit dolorem nesciunt in debitis, eum eaque animi dignissimos unde corporis optio cupiditate blanditiis accusamus mollitia labore nobis! Hic fuga sequi tempora provident nihil iusto aperiam facilis mollitia fugiat quo. Natus quas ea delectus. Vitae molestiae quod distinctio provident? Illo quae suscipit eius dicta quo.
-          </div>
-        </div>
-
-        <Navigation />
+        </main>
       </div>
-    </>
+
+      <Navigation />
+    </div>
   );
 }

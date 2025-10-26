@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -66,7 +65,7 @@ export default function PostPage() {
     if (postId) {
       fetchPost(postId);
     }
-  }, [postId]);
+  }, [postId, firebaseUser]);
 
   const fetchPost = async (id: string) => {
     try {
@@ -88,14 +87,15 @@ export default function PostPage() {
   const checkUserInteractions = async (postId: string, email: string) => {
     try {
       const res = await fetch(
-        `/api/user/interactions?postId=${encodeURIComponent(
-          postId
-        )}&email=${encodeURIComponent(email)}`
+        `/api/interactions?email=${encodeURIComponent(
+          email
+        )}&postIds=${encodeURIComponent(JSON.stringify([postId]))}`
       );
       const data = await res.json();
+
       if (res.ok) {
-        setIsLiked(data.isLiked);
-        setIsBookmarked(data.isBookmarked);
+        setIsLiked(data.likes.includes(postId));
+        setIsBookmarked(data.bookmarks.includes(postId));
       }
     } catch (err) {
       console.error(err);
@@ -122,9 +122,7 @@ export default function PostPage() {
 
       setIsLiked(!isLiked);
       setPost((prev) =>
-        prev
-          ? { ...prev, likes: isLiked ? prev.likes - 1 : prev.likes + 1 }
-          : null
+        prev ? { ...prev, likes: data.likes } : null
       );
     } catch (err) {
       console.error(err);
@@ -271,9 +269,7 @@ export default function PostPage() {
     const r = parseInt(hex.substring(0, 2), 16);
     const g = parseInt(hex.substring(2, 4), 16);
     const b = parseInt(hex.substring(4, 6), 16);
-
     const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-
     return brightness > 128 ? "#000000" : "#ffffff";
   }
 
@@ -325,7 +321,9 @@ export default function PostPage() {
               {new Date(comment.createdAt).toLocaleDateString()}
             </span>
           </div>
+
           <p className="text-gray-700 mt-1">{comment.content}</p>
+
           <div className="flex items-center gap-4 mt-2">
             <button className="flex items-center gap-1 text-sm text-gray-500 hover:text-[#bd9864ff]">
               <svg
@@ -342,6 +340,7 @@ export default function PostPage() {
               </svg>
               <span>{comment.likes}</span>
             </button>
+
             {firebaseUser && (
               <button
                 onClick={() => setReplyTo(comment._id)}
@@ -429,7 +428,6 @@ export default function PostPage() {
             </div>
 
             <h1 className="text-4xl font-bold mb-3">{post.title}</h1>
-
             <div className="flex items-center gap-4 text-sm opacity-75">
               <span>{new Date(post.createdAt).toLocaleDateString()}</span>
               <span>•</span>
