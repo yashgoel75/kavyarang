@@ -10,7 +10,6 @@ const CommentSchema = new Schema({
     parentComment: { type: Schema.Types.ObjectId, ref: "Comment", default: null },
 }, { timestamps: true });
 
-
 const PostSchema = new Schema({
     title: { type: String, required: true },
     content: { type: String, required: true },
@@ -22,6 +21,13 @@ const PostSchema = new Schema({
     color: { type: String, required: false },
 }, { timestamps: true });
 
+const NotificationSchema = new Schema({
+    type: { type: String, required: true },
+    fromEmail: { type: String, required: true },
+    postId: { type: Schema.Types.ObjectId, ref: "Post" },
+    read: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now },
+});
 
 const UserSchema = new Schema({
     name: { type: String, required: true },
@@ -36,6 +42,7 @@ const UserSchema = new Schema({
     followers: [String],
     following: [String],
     likes: [String],
+    notifications: [NotificationSchema],
 }, { timestamps: true });
 
 export const User = mongoose.models.User || mongoose.model("User", UserSchema);

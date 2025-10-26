@@ -40,6 +40,19 @@ export async function POST(req: NextRequest) {
                 { $addToSet: { followers: currentUserEmail } }
             );
 
+            const notification = {
+                id: new Date().getTime().toString(),
+                type: "new_follower",
+                fromEmail: currentUserEmail,
+                read: false,
+                createdAt: new Date(),
+            };
+
+            await User.updateOne(
+                { email: targetEmail },
+                { $push: { notifications: notification } }
+            );
+
             return NextResponse.json(
                 { message: "User followed successfully" },
                 { status: 200 }
