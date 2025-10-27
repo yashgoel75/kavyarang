@@ -48,7 +48,9 @@ export default function Dashboard() {
   const [likedPosts, setLikedPosts] = useState<Record<string, boolean>>({});
   const [bookmarkedPosts, setBookmarkedPosts] = useState<
     Record<string, boolean>
-  >({});
+    >({});
+  const [fetchedInteractionIds, setFetchedInteractionIds] = useState<Set<string>>(new Set());
+
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -108,43 +110,53 @@ export default function Dashboard() {
 
     fetchPosts();
   }, [page, userData]);
+
   useEffect(() => {
-    if (!firebaseUser || !posts?.length) return;
+  if (!firebaseUser || !posts?.length) return;
 
-    const fetchInteractions = async () => {
-      try {
-        const postIds = posts.map((p) => p._id);
+  const fetchInteractions = async () => {
+    const newPostIds = posts
+      .map((p) => p._id)
+      .filter((id) => !fetchedInteractionIds.has(id));
 
-        const res = await fetch(`/api/interactions`, {
-          method: "POST",
-          body: JSON.stringify({ email: firebaseUser.email, postIds }),
-          headers: { "Content-Type": "application/json" },
+    if (newPostIds.length === 0) return;
+
+    try {
+      const res = await fetch(`/api/interactions`, {
+        method: "POST",
+        body: JSON.stringify({ email: firebaseUser.email, postIds: newPostIds }),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setLikedPosts((prev) => {
+          const updated = { ...prev };
+          data.likes.forEach((id: string) => (updated[id] = true));
+          return updated;
         });
 
-        const data = await res.json();
+        setBookmarkedPosts((prev) => {
+          const updated = { ...prev };
+          data.bookmarks.forEach((id: string) => (updated[id] = true));
+          return updated;
+        });
 
-        if (res.ok) {
-          const likedMap: Record<string, boolean> = {};
-          const bookmarkedMap: Record<string, boolean> = {};
-
-          data.likes.forEach((id: string) => {
-            likedMap[id] = true;
-          });
-
-          data.bookmarks.forEach((id: string) => {
-            bookmarkedMap[id] = true;
-          });
-
-          setLikedPosts(likedMap);
-          setBookmarkedPosts(bookmarkedMap);
-        }
-      } catch (err) {
-        console.error("Failed to load interactions", err);
+        setFetchedInteractionIds((prev) => {
+          const updated = new Set(prev);
+          newPostIds.forEach((id) => updated.add(id));
+          return updated;
+        });
       }
-    };
+    } catch (err) {
+      console.error("Failed to load interactions", err);
+    }
+  };
 
-    fetchInteractions();
-  }, [firebaseUser, posts]);
+  fetchInteractions();
+}, [firebaseUser, posts]);
+
 
   const handleLike = async (postId: string) => {
     if (!firebaseUser) return;
@@ -491,17 +503,6 @@ export default function Dashboard() {
                         </Link>
                       </div>
                     </div>
-                    {hasMore && (
-                      <div className="flex justify-center mt-8">
-                        <button
-                          onClick={() => setPage((prev) => prev + 1)}
-                          disabled={loadingPosts}
-                          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-all font-medium"
-                        >
-                          {loadingPosts ? "Loading..." : "Load More"}
-                        </button>
-                      </div>
-                    )}
                   </div>
                 ))
               ) : (
@@ -511,6 +512,17 @@ export default function Dashboard() {
                 </div>
               )}
             </div>
+            {hasMore && (
+              <div className="flex justify-center mt-8">
+                <button
+                  onClick={() => setPage((prev) => prev + 1)}
+                  disabled={loadingPosts}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-all font-medium"
+                >
+                  {loadingPosts ? "Loading..." : "Load More"}
+                </button>
+              </div>
+            )}
           </div>
         </main>
       </div>
