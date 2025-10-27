@@ -50,6 +50,10 @@ export default function Dashboard() {
     Record<string, boolean>
   >({});
 
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingPosts, setLoadingPosts] = useState(false);
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
@@ -82,20 +86,28 @@ export default function Dashboard() {
     if (!userData) return;
 
     const fetchPosts = async () => {
+      if (loadingPosts || !hasMore) return;
+
+      setLoadingPosts(true);
       try {
-        const res = await fetch(`/api/getPosts`);
+        const res = await fetch(`/api/getPosts?page=${page}&limit=9`);
         const data = await res.json();
-        const filteredPosts = data.posts.filter((post: Post) => {
-          return post.author.email != userData?.email;
-        });
-        setPosts(filteredPosts);
-      } catch (error) {
-        console.log(error);
+
+        const filtered = data.posts.filter(
+          (p: Post) => p.author.email !== userData.email
+        );
+
+        setPosts((prev) => (prev ? [...prev, ...filtered] : filtered));
+        setHasMore(data.hasMore);
+      } catch (err) {
+        console.error("Error fetching posts:", err);
+      } finally {
+        setLoadingPosts(false);
       }
     };
-    fetchPosts();
-  }, [userData]);
 
+    fetchPosts();
+  }, [page, userData]);
   useEffect(() => {
     if (!firebaseUser || !posts?.length) return;
 
@@ -103,11 +115,11 @@ export default function Dashboard() {
       try {
         const postIds = posts.map((p) => p._id);
 
-        const res = await fetch(
-          `/api/interactions?email=${encodeURIComponent(
-            firebaseUser.email!
-          )}&postIds=${encodeURIComponent(JSON.stringify(postIds))}`
-        );
+        const res = await fetch(`/api/interactions`, {
+          method: "POST",
+          body: JSON.stringify({ email: firebaseUser.email, postIds }),
+          headers: { "Content-Type": "application/json" },
+        });
 
         const data = await res.json();
 
@@ -346,13 +358,6 @@ export default function Dashboard() {
           </div>
         </aside>
 
-        <button
-          className="fixed top-20 left-4 z-50 p-3 bg-white rounded-full shadow-lg md:hidden hover:bg-gray-50 transition-all"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-        >
-          <Menu size={22} className="text-gray-700" />
-        </button>
-
         {sidebarOpen && (
           <div
             className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
@@ -486,6 +491,17 @@ export default function Dashboard() {
                         </Link>
                       </div>
                     </div>
+                    {hasMore && (
+                      <div className="flex justify-center mt-8">
+                        <button
+                          onClick={() => setPage((prev) => prev + 1)}
+                          disabled={loadingPosts}
+                          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-all font-medium"
+                        >
+                          {loadingPosts ? "Loading..." : "Load More"}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))
               ) : (

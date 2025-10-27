@@ -41,3 +41,37 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
+
+export async function POST(req: NextRequest) {
+  try {
+    await register();
+    const { email, postIds } = await req.json();
+
+    if (!email || !Array.isArray(postIds)) {
+      return NextResponse.json(
+        { error: "Email and postIds are required" },
+        { status: 400 }
+      );
+    }
+
+    const user = await User.findOne({ email }).lean();
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const userObj = user as UserDocument;
+
+    const likes = (userObj.likes || []).filter((id: string) =>
+      postIds.includes(id)
+    );
+    const bookmarks = (userObj.bookmarks || []).filter((id: string) =>
+      postIds.includes(id)
+    );
+
+    return NextResponse.json({ likes, bookmarks }, { status: 200 });
+  } catch (err) {
+    console.error("Error checking interactions (POST):", err);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  }
+}

@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { getAuth, signOut, onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Header() {
   const router = useRouter();
@@ -93,20 +94,22 @@ export default function Header() {
   return (
     <>
       <div className="w-full flex justify-between items-center px-5 mt-2 md:mt-0 z-20 bg-white">
-        <GradientText
-          colors={[
-            "#9a6f0bff",
-            "#bd9864ff",
-            "#dbb56aff",
-            "#7f7464ff",
-            "#e9e99dff",
-          ]}
-          animationSpeed={5}
-          showBorder={false}
-          className="custom-class text-[35px] md:text-[65px] ml-1"
-        >
-          kavyansh
-        </GradientText>
+        <Link href={"/dashboard"}>
+          <GradientText
+            colors={[
+              "#9a6f0bff",
+              "#bd9864ff",
+              "#dbb56aff",
+              "#7f7464ff",
+              "#e9e99dff",
+            ]}
+            animationSpeed={5}
+            showBorder={false}
+            className="custom-class text-[35px] md:text-[65px] ml-1"
+          >
+            kavyansh
+          </GradientText>
+        </Link>
 
         <div
           className="mr-5 md:hidden cursor-pointer"
