@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Onest:wght@100..900&family=Outfit:wght@100..900&display=swap");
 
 @custom-variant dark (&:is(.dark *));
 
@@ -42,7 +43,6 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 }
-
 
 :root {
   --radius: 0.625rem;
@@ -122,6 +122,13 @@
   }
 }
 
+.inter-normal {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
 @font-face {
   font-family: "Samarkan";
   src: url("/fonts/samarkan/samarkan.ttf") format("truetype");
@@ -132,4 +139,3 @@
 .custom-class {
   font-family: "Samarkan";
 }
-

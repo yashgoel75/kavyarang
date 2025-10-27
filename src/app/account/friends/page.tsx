@@ -113,7 +113,7 @@ export default function FriendsPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: firebaseUser.email,
+          currentUserEmail: firebaseUser.email,
           targetEmail: friendEmail,
           action: "follow",
         }),

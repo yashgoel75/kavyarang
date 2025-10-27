@@ -323,14 +323,15 @@ export default function Account() {
   return (
     <>
       <Header />
-      <main className="max-w-5xl mx-auto px-4 py-10 min-h-[85vh]">
+      <main className="max-w-5xl mx-auto px-4 py-10 min-h-[85vh] inter-normal">
         <div className="mb-10">
-          <h2 className="text-4xl font-bold text-gray-800 mb-1">My Account</h2>
-          <div className="h-0.5 w-20 bg-gradient-to-r from-[#bd9864ff] to-transparent"></div>
+          <h2 className="text-3xl font-bold text-gray-800 text-center">
+            Account
+          </h2>
         </div>
 
-        <div className="flex-1 space-y-4 md:flex justify-around gap-1 bg-white shadow-sm rounded-lg p-8 mb-8 border border-gray-100">
-          <div className="border-1 lg:w-lg rounded-xl shadow-lg border-gray-100 p-5">
+        <div className="flex-1 space-y-4 md:flex justify-around gap-1 bg-white shadow-sm rounded-xl p-2 md:p-8 mb-8 border border-gray-100">
+          <div className="border-1 lg:w-lg rounded-lg shadow-lg border-gray-100 p-5">
             <div className="flex flex-col items-center space-y-6">
               <div className="relative">
                 <div className="relative w-32 h-32">
@@ -382,7 +383,7 @@ export default function Account() {
                     {userData.name}
                   </h3>
                   <p className="text-gray-500">@{userData.username}</p>
-                  <p className="text-gray-600 text-sm">{userData.email}</p>
+                  <p className="text-gray-600">{userData.email}</p>
                   {userData.bio && (
                     <div className="mt-4 pt-4 border-t border-gray-100">
                       <p className="text-gray-700 italic">
@@ -463,7 +464,7 @@ export default function Account() {
                       )}
                   </div>
 
-                  <div className="w-full  space-y-4">
+                  <div className="w-full space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Instagram
@@ -533,8 +534,8 @@ export default function Account() {
               )}
             </div>
           </div>
-          <div className="border-1 min-w-[300px] rounded-xl shadow-lg border-gray-100 p-5">
-            <div className="flex flex-col">
+          <div className="border-1 min-w-[300px] rounded-xl shadow-lg border-gray-100 p-5 inter-normal">
+            <div className="flex flex-col space-y-4">
               <div className="flex flex-col gap-5">
                 {userData.instagram ? (
                   <div>
@@ -615,7 +616,7 @@ export default function Account() {
             <div>
               <h3 className="text-2xl font-semibold text-gray-800">My Posts</h3>
             </div>
-            <div className="px-3 py-1 rounded-md text-sm bg-green-600 hover:bg-green-700 cursor-pointer text-white">
+            <div className="px-3 py-1 rounded-full text-sm bg-yellow-600 hover:bg-yellow-700 cursor-pointer text-white">
               <button
                 className="cursor-pointer"
                 onClick={() => router.push("/account/createPost")}
