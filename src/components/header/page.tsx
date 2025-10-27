@@ -14,6 +14,7 @@ export default function Header() {
   const [isMobile, setIsMobile] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -25,9 +26,12 @@ export default function Header() {
 
   const fetchUserName = async (email: string) => {
     try {
-      const response = await fetch(`/api/user?email=${encodeURIComponent(email)}`);
+      const response = await fetch(
+        `/api/user?email=${encodeURIComponent(email)}`
+      );
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Failed to fetch user name");
+      if (!response.ok)
+        throw new Error(data.error || "Failed to fetch user name");
       if (data?.name) setDisplayName(data.name);
     } catch (err) {
       console.error("Error fetching user name:", err);
@@ -88,7 +92,7 @@ export default function Header() {
 
   return (
     <>
-      <div className="w-full flex justify-between items-center px-5 mt-2 md:mt-0 z-20 bg-white">
+      <div className="top-0 w-full flex justify-between items-center px-5 mt-2 md:mt-0 z-20 bg-white">
         <GradientText
           colors={[
             "#9a6f0bff",
@@ -104,54 +108,71 @@ export default function Header() {
           kavyansh
         </GradientText>
 
-        <div className="flex items-center bg-gray-100 border border-gray-300 rounded-xl h-[40px] w-full max-w-[500px] ml-4 px-3">
-          {renderSearch()}
-
-          <div className="h-5 w-[1px] bg-gray-300 mx-2" />
-
-          {user ? (
-            <div className="relative">
-              <button
-                className="user-icon-btn p-1 rounded-full hover:bg-gray-100 cursor-pointer transition active:scale-95"
-                onClick={() => setIsOpen((prev) => !prev)}
-              >
-                <UserIcon size={22} strokeWidth={1.75} />
-              </button>
-
-              {isOpen && (
-                <div className="absolute right-0 mt-2 min-w-[160px] bg-white border border-gray-200 rounded-md shadow-lg z-50 menu-dropdown">
-                  <div className="px-4 py-2 border-b border-gray-200">
-                    <p className="font-semibold">{displayName || "User"}</p>
-                    <p className="text-sm text-gray-500">{user.email}</p>
-                  </div>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2 cursor-pointer"
-                  >
-                    <LogOut size={16} />
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
+        <div className="flex items-center gap-3 md:gap-4">
+          {isMobile ? (
+            <button
+              className="cursor-pointer hover:bg-gray-100 p-1 rounded-md transition active:scale-95"
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+            >
+              <Search size={22} />
+            </button>
           ) : (
-            <div className="flex gap-2">
-              <button
-                onClick={() => router.push("/auth/login")}
-                className="flex items-center rounded-lg bg-gradient-to-br from-[#9a6f0bff] to-[#dbb56aff] text-white px-3 text-sm py-1 cursor-pointer"
-              >
-                Login
-              </button>
-              <button
-                onClick={() => router.push("/auth/register")}
-                className="px-3 py-1 border border-gray-300 rounded-lg text-sm cursor-pointer"
-              >
-                Register
-              </button>
+            <div className="flex items-center bg-gray-100 border border-gray-300 px-3 rounded-xl h-[40px] w-[500px]">
+              {renderSearch()}
             </div>
           )}
+
+          <div className="relative">
+            {user ? (
+              <>
+                <button
+                  className="user-icon-btn p-1 rounded-full hover:bg-gray-100 cursor-pointer transition active:scale-95"
+                  onClick={() => setIsOpen((prev) => !prev)}
+                >
+                  <UserIcon size={25} strokeWidth={1.75} />
+                </button>
+
+                {isOpen && (
+                  <div className="absolute right-0 mt-2 min-w-[160px] bg-white border border-gray-200 rounded-md shadow-lg z-50 menu-dropdown">
+                    <div className="px-4 py-2 border-b border-gray-200">
+                      <p className="font-semibold">{displayName || "User"}</p>
+                      <p className="text-sm text-gray-500">{user.email}</p>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2 cursor-pointer"
+                    >
+                      <LogOut size={16} />
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="flex gap-2 h-[40px]">
+                <button
+                  onClick={() => router.push("/auth/login")}
+                  className="flex items-center rounded-lg bg-gradient-to-br from-[#9a6f0bff] to-[#dbb56aff] text-white px-4 text-sm py-1 cursor-pointer"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => router.push("/auth/register")}
+                  className="px-3 py-1 border border-gray-300 rounded-lg text-sm cursor-pointer"
+                >
+                  Register
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
+      {isMobile && isSearchOpen && (
+        <div className="flex items-center bg-gray-100 border md:hidden my-2 border-gray-300 px-3 rounded-md h-[35px] mx-5">
+          {renderSearch()}
+        </div>
+      )}
 
       <div className="border-1 border-gray-200 mt-2"></div>
     </>
