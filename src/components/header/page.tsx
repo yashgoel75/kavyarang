@@ -6,7 +6,6 @@ import { useState, useEffect } from "react";
 import { getAuth, signOut, onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 
 export default function Header() {
   const router = useRouter();
@@ -15,7 +14,6 @@ export default function Header() {
   const [isMobile, setIsMobile] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -27,12 +25,9 @@ export default function Header() {
 
   const fetchUserName = async (email: string) => {
     try {
-      const response = await fetch(
-        `/api/user?email=${encodeURIComponent(email)}`
-      );
+      const response = await fetch(`/api/user?email=${encodeURIComponent(email)}`);
       const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.error || "Failed to fetch user name");
+      if (!response.ok) throw new Error(data.error || "Failed to fetch user name");
       if (data?.name) setDisplayName(data.name);
     } catch (err) {
       console.error("Error fetching user name:", err);
@@ -94,42 +89,33 @@ export default function Header() {
   return (
     <>
       <div className="w-full flex justify-between items-center px-5 mt-2 md:mt-0 z-20 bg-white">
-        <Link href={"/dashboard"}>
-          <GradientText
-            colors={[
-              "#9a6f0bff",
-              "#bd9864ff",
-              "#dbb56aff",
-              "#7f7464ff",
-              "#e9e99dff",
-            ]}
-            animationSpeed={5}
-            showBorder={false}
-            className="custom-class text-[35px] md:text-[65px] ml-1"
-          >
-            kavyansh
-          </GradientText>
-        </Link>
-
-        <div
-          className="mr-5 md:hidden cursor-pointer"
-          onClick={() => setIsSearchOpen(!isSearchOpen)}
+        <GradientText
+          colors={[
+            "#9a6f0bff",
+            "#bd9864ff",
+            "#dbb56aff",
+            "#7f7464ff",
+            "#e9e99dff",
+          ]}
+          animationSpeed={5}
+          showBorder={false}
+          className="custom-class text-[35px] md:text-[65px] ml-1"
         >
-          <Search />
-        </div>
+          kavyansh
+        </GradientText>
 
-        <div className="hidden md:flex items-center bg-gray-100 border border-gray-300 px-3 rounded-xl h-[40px] mx-5 w-[500px]">
+        <div className="flex items-center bg-gray-100 border border-gray-300 rounded-xl h-[40px] w-full max-w-[500px] ml-4 px-3">
           {renderSearch()}
-        </div>
 
-        <div className="relative">
+          <div className="h-5 w-[1px] bg-gray-300 mx-2" />
+
           {user ? (
-            <>
+            <div className="relative">
               <button
-                className="user-icon-btn mt-2 p-1 rounded-full hover:bg-gray-100 hover:p-1 cursor-pointer transition active:scale-95"
+                className="user-icon-btn p-1 rounded-full hover:bg-gray-100 cursor-pointer transition active:scale-95"
                 onClick={() => setIsOpen((prev) => !prev)}
               >
-                <UserIcon size={25} strokeWidth={1.75} />
+                <UserIcon size={22} strokeWidth={1.75} />
               </button>
 
               {isOpen && (
@@ -147,18 +133,18 @@ export default function Header() {
                   </button>
                 </div>
               )}
-            </>
+            </div>
           ) : (
-            <div className="flex gap-2 h-[40px]">
+            <div className="flex gap-2">
               <button
                 onClick={() => router.push("/auth/login")}
-                className="flex items-center rounded-lg bg-gradient-to-br from-[#9a6f0bff] to-[#dbb56aff] text-white px-5 text-lg py-1 cursor-pointer"
+                className="flex items-center rounded-lg bg-gradient-to-br from-[#9a6f0bff] to-[#dbb56aff] text-white px-3 text-sm py-1 cursor-pointer"
               >
                 Login
               </button>
               <button
                 onClick={() => router.push("/auth/register")}
-                className="px-3 py-1 border border-gray-300 rounded-lg flex items-center text-lg cursor-pointer"
+                className="px-3 py-1 border border-gray-300 rounded-lg text-sm cursor-pointer"
               >
                 Register
               </button>
@@ -167,11 +153,6 @@ export default function Header() {
         </div>
       </div>
 
-      {isSearchOpen && (
-        <div className="flex items-center bg-gray-100 border md:hidden my-1 border-gray-300 px-3 rounded-md h-[35px] mx-5">
-          {renderSearch()}
-        </div>
-      )}
       <div className="border-1 border-gray-200 mt-2"></div>
     </>
   );
