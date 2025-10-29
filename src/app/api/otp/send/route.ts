@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
         <div style="margin: auto; background-color: white; border-radius: 10px; padding: 25px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); max-width: 600px;">
           
           <div style="text-align: center; margin-bottom: 25px;">
-  <img src="https://cdc.cleit.in/upasthiti.png" 
+  <img src="https://kavyanshbykavyarang.vercel.app/logo.png" 
        alt="Upasthiti" 
        style="width: 180px; height: auto;">
 </div>
