@@ -2,7 +2,7 @@
 
 import Header from "@/components/header/page";
 import Navigation from "@/components/navigation/page";
-import Footer from "@/components/footer/page";
+import { Send } from "lucide-react";
 import { useState, useEffect } from "react";
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -12,6 +12,7 @@ import Image from "next/image";
 import snapchat from "../../../public/snapchat.png";
 import instagram from "../../../public/instagram.png";
 import Link from "next/link";
+import PostCard from "./PostCard";
 
 interface Post {
   _id: string;
@@ -48,9 +49,10 @@ export default function Dashboard() {
   const [likedPosts, setLikedPosts] = useState<Record<string, boolean>>({});
   const [bookmarkedPosts, setBookmarkedPosts] = useState<
     Record<string, boolean>
-    >({});
-  const [fetchedInteractionIds, setFetchedInteractionIds] = useState<Set<string>>(new Set());
-
+  >({});
+  const [fetchedInteractionIds, setFetchedInteractionIds] = useState<
+    Set<string>
+  >(new Set());
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -84,6 +86,16 @@ export default function Dashboard() {
     }
   };
 
+  const getInitials = (name: string) => {
+    if (!name || name === "Unknown User") return "?";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   useEffect(() => {
     if (!userData) return;
 
@@ -112,51 +124,53 @@ export default function Dashboard() {
   }, [page, userData]);
 
   useEffect(() => {
-  if (!firebaseUser || !posts?.length) return;
+    if (!firebaseUser || !posts?.length) return;
 
-  const fetchInteractions = async () => {
-    const newPostIds = posts
-      .map((p) => p._id)
-      .filter((id) => !fetchedInteractionIds.has(id));
+    const fetchInteractions = async () => {
+      const newPostIds = posts
+        .map((p) => p._id)
+        .filter((id) => !fetchedInteractionIds.has(id));
 
-    if (newPostIds.length === 0) return;
+      if (newPostIds.length === 0) return;
 
-    try {
-      const res = await fetch(`/api/interactions`, {
-        method: "POST",
-        body: JSON.stringify({ email: firebaseUser.email, postIds: newPostIds }),
-        headers: { "Content-Type": "application/json" },
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setLikedPosts((prev) => {
-          const updated = { ...prev };
-          data.likes.forEach((id: string) => (updated[id] = true));
-          return updated;
+      try {
+        const res = await fetch(`/api/interactions`, {
+          method: "POST",
+          body: JSON.stringify({
+            email: firebaseUser.email,
+            postIds: newPostIds,
+          }),
+          headers: { "Content-Type": "application/json" },
         });
 
-        setBookmarkedPosts((prev) => {
-          const updated = { ...prev };
-          data.bookmarks.forEach((id: string) => (updated[id] = true));
-          return updated;
-        });
+        const data = await res.json();
 
-        setFetchedInteractionIds((prev) => {
-          const updated = new Set(prev);
-          newPostIds.forEach((id) => updated.add(id));
-          return updated;
-        });
+        if (res.ok) {
+          setLikedPosts((prev) => {
+            const updated = { ...prev };
+            data.likes.forEach((id: string) => (updated[id] = true));
+            return updated;
+          });
+
+          setBookmarkedPosts((prev) => {
+            const updated = { ...prev };
+            data.bookmarks.forEach((id: string) => (updated[id] = true));
+            return updated;
+          });
+
+          setFetchedInteractionIds((prev) => {
+            const updated = new Set(prev);
+            newPostIds.forEach((id) => updated.add(id));
+            return updated;
+          });
+        }
+      } catch (err) {
+        console.error("Failed to load interactions", err);
       }
-    } catch (err) {
-      console.error("Failed to load interactions", err);
-    }
-  };
+    };
 
-  fetchInteractions();
-}, [firebaseUser, posts]);
-
+    fetchInteractions();
+  }, [firebaseUser, posts]);
 
   const handleLike = async (postId: string) => {
     if (!firebaseUser) return;
@@ -391,119 +405,20 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {posts?.length ? (
                 posts.map((post) => (
-                  <div
+                  <PostCard
                     key={post._id}
-                    style={{
-                      backgroundColor: post.color || "#ffffff",
-                      color: getTextColor(post.color || "#ffffff"),
-                    }}
-                    className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group flex flex-col"
-                  >
-                    {post.picture && (
-                      <Link href={`/post/${post._id}`}>
-                        <div className="relative overflow-hidden h-56 cursor-pointer">
-                          <img
-                            src={post.picture}
-                            alt={post.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        </div>
-                      </Link>
-                    )}
-
-                    <div className="flex flex-col flex-grow p-5">
-                      <Link href={`/post/${post._id}`}>
-                        <h2 className="font-bold text-xl   mb-2 line-clamp-1">
-                          {post.title}
-                        </h2>
-                        <p
-                          className="text-sm leading-relaxed line-clamp-3 mb-4 flex-grow"
-                          dangerouslySetInnerHTML={{
-                            __html:
-                              post.content?.length > 120
-                                ? post.content.slice(0, 120) + "..."
-                                : post.content,
-                          }}
-                        ></p>
-                      </Link>
-
-                      <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-auto">
-                        <div className="flex gap-3 items-center">
-                          <button
-                            onClick={() => handleLike(post._id)}
-                            disabled={!firebaseUser}
-                            className={`flex items-center gap-2 transition-transform hover:scale-110 disabled:cursor-not-allowed`}
-                            style={{
-                              color: getIconColor(
-                                post.color || "#ffffff",
-                                likedPosts[post._id]
-                              ),
-                              textShadow:
-                                getTextColor(post.color || "#ffffff") ===
-                                "#ffffff"
-                                  ? "0 0 4px rgba(0,0,0,0.4)"
-                                  : "0 0 4px rgba(255,255,255,0.4)",
-                            }}
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 20 20"
-                              fill={
-                                likedPosts[post._id]
-                                  ? getIconColor(post.color || "#ffffff", true)
-                                  : "none"
-                              }
-                              stroke={getIconColor(
-                                post.color || "#ffffff",
-                                likedPosts[post._id]
-                              )}
-                              strokeWidth="1.5"
-                              className="h-5 w-5 transition-all duration-200"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                            <span className="text-sm font-semibold">
-                              {post.likes}
-                            </span>
-                          </button>
-
-                          <button
-                            onClick={() => handleBookmark(post._id)}
-                            disabled={!firebaseUser}
-                            className={`flex items-center gap-2 hover:scale-110 transition-transform disabled:cursor-not-allowed ${
-                              bookmarkedPosts[post._id] ? "text-yellow-500" : ""
-                            }`}
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-4 w-4"
-                              viewBox="0 0 20 20"
-                              fill={
-                                bookmarkedPosts[post._id]
-                                  ? "currentColor"
-                                  : "none"
-                              }
-                              stroke="currentColor"
-                              strokeWidth="1.5"
-                            >
-                              <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
-                            </svg>
-                          </button>
-                        </div>
-
-                        <Link href={`/post/${post._id}`}>
-                          <button className="cursor-pointer text-sm font-medium">
-                            Tap to Comment
-                          </button>
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
+                    post={post}
+                    firebaseUser={firebaseUser}
+                    userData={userData}
+                    likedPosts={likedPosts}
+                    bookmarkedPosts={bookmarkedPosts}
+                    handleLike={handleLike}
+                    handleBookmark={handleBookmark}
+                    getTextColor={getTextColor}
+                    getIconColor={getIconColor}
+                    getInitials={getInitials}
+                    router={router}
+                  />
                 ))
               ) : (
                 <div className="col-span-full flex flex-col items-center justify-center py-20">
