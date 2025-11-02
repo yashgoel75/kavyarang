@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function Navigation() {
   const [isMobile, setIsMobile] = useState(false);
@@ -11,6 +12,8 @@ export default function Navigation() {
   const [hasNotification, setHasNotification] = useState(false);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
 
+  const router = useRouter();
+  const pathname = usePathname();
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     handleResize();
@@ -35,7 +38,9 @@ export default function Navigation() {
       setFirebaseUser(user);
       if (user?.email) {
         try {
-          const res = await fetch(`/api/notifications?email=${encodeURIComponent(user.email)}`);
+          const res = await fetch(
+            `/api/notifications?email=${encodeURIComponent(user.email)}`
+          );
           const data = await res.json();
           setHasNotification((data.notifications || []).length > 0);
         } catch (err) {
@@ -49,9 +54,43 @@ export default function Navigation() {
   const icons = [
     { name: Home, url: "dashboard", title: "Home" },
     { name: Bookmark, url: "bookmark", title: "Bookmarks" },
-    { name: Bell, url: "notifications", title: "Notifications", hasNotification },
+    {
+      name: Bell,
+      url: "notifications",
+      title: "Notifications",
+      hasNotification,
+    },
     { name: User, url: "account", title: "Account" },
   ];
+
+  const [isDashboardPage, setIsDashboardPage] = useState(false);
+  const [isBookmarkPage, setIsBookmarkPage] = useState(false);
+  const [isNotificationsPage, setIsNotificationsPage] = useState(false);
+  const [isAccountPage, setIsAccountPage] = useState(false);
+
+  useEffect(() => {
+    if (pathname.includes("dashboard")) {
+      setIsBookmarkPage(false);
+      setIsNotificationsPage(false);
+      setIsAccountPage(false);
+      setIsDashboardPage(true);
+    } else if (pathname.includes("bookmark")) {
+      setIsNotificationsPage(false);
+      setIsAccountPage(false);
+      setIsDashboardPage(false);
+      setIsBookmarkPage(true);
+    } else if (pathname.includes("notifications")) {
+      setIsBookmarkPage(false);
+      setIsAccountPage(false);
+      setIsDashboardPage(false);
+      setIsNotificationsPage(true);
+    } else if (pathname.includes("account")) {
+      setIsBookmarkPage(false);
+      setIsNotificationsPage(false);
+      setIsDashboardPage(false);
+      setIsAccountPage(true);
+    }
+  }, []);
 
   return (
     <div
@@ -65,13 +104,33 @@ export default function Navigation() {
         {icons.map((icon, indx) => (
           <Link
             key={indx}
-            href={icon.url === "notifications" ? "/account/notifications" : `/${icon.url}`}
+            href={
+              icon.url === "notifications"
+                ? "/account/notifications"
+                : `/${icon.url}`
+            }
             title={icon.title}
             className="relative group"
           >
             <icon.name
-              size={isMobile ? 25 : 30}
-              className="cursor-pointer hover:scale-125 transition"
+              size={isMobile ? 25 : 35}
+              className={`cursor-pointer hover:scale-125 transition border-b-2 pb-1 ${
+                icon.url == "account" && isAccountPage
+                  ? "border-yellow-700"
+                  : "border-white"
+              } ${
+                icon.url == "bookmark" && isBookmarkPage
+                  ? "border-yellow-700"
+                  : "border-white"
+              } ${
+                icon.url == "notifications" && isNotificationsPage
+                  ? "border-yellow-700"
+                  : "border-white"
+              } ${
+                icon.url == "dashboard" && isDashboardPage
+                  ? "border-yellow-700"
+                  : "border-white"
+              }`}
             />
 
             {icon.hasNotification && icon.url === "notifications" && (

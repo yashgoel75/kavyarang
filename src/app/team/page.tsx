@@ -1,8 +1,10 @@
 import Header from "@/components/header/page";
 import Member from "./member/member";
+import Navigation from "@/components/navigation/page";
 import Footer from "@/components/footer/page";
 
 import yashgoel from "@/assets/team/yash_goel.png";
+import shraydobhal from "@/assets/team/shray.jpg";
 import vaibhavarya from "@/assets/team/vaibhav_arya.png";
 
 export default function Team() {
@@ -10,7 +12,14 @@ export default function Team() {
     {
       imageSrc: yashgoel,
       name: "Yash Goel",
-      role: "Founder & Lead Developer",
+      role: "Co-Founder & Lead Developer",
+      linkedin: "https://linkedin.com/in/yashgoel75",
+      instagram: "",
+    },
+    {
+      imageSrc: shraydobhal,
+      name: "Shray Dobhal",
+      role: "Co-Founder & Product Lead",
       linkedin: "https://linkedin.com/in/yashgoel75",
       instagram: "",
     },
@@ -30,7 +39,7 @@ export default function Team() {
         <h2 className="text-4xl font-bold text-gray-900 mb-12 text-center">
           Meet Our Team
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-10 lg:gap-35 justify-items-center">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-5 lg:gap-10 justify-items-center">
           {teamMembers.map((member, index) => (
             <Member
               key={index}
@@ -43,6 +52,7 @@ export default function Team() {
           ))}
         </div>
       </div>
+      <Navigation/>
       <div className="w-full bottom-0">
         <Footer />
       </div>
