@@ -20,8 +20,8 @@ export default function Team() {
       imageSrc: shraydobhal,
       name: "Shray Dobhal",
       role: "Co-Founder & Product Lead",
-      linkedin: "https://linkedin.com/in/yashgoel75",
-      instagram: "",
+      linkedin: "https://www.linkedin.com/in/shray-dobhal-5a9009308/",
+      instagram: "https://www.instagram.com/shray_dobhal0413",
     },
     {
       imageSrc: vaibhavarya,
@@ -52,7 +52,7 @@ export default function Team() {
           ))}
         </div>
       </div>
-      <Navigation/>
+      <Navigation />
       <div className="w-full bottom-0">
         <Footer />
       </div>
