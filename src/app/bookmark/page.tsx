@@ -181,13 +181,6 @@ export default function Bookmarks() {
     }
   };
 
-  if (loading)
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading...
-      </div>
-    );
-
   return (
     <>
       <Header />
@@ -198,6 +191,10 @@ export default function Bookmarks() {
           <p className="text-center text-gray-500">
             You haven&rsquo;t bookmarked any posts yet.
           </p>
+        ) : loading ? (
+          <div className="min-h-screen flex items-center justify-center">
+            Loading...
+          </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {postsWithAuthors.map((post) => {
@@ -277,7 +274,10 @@ export default function Bookmarks() {
                     )}
                   </div>
 
-                  <div className="flex-grow cursor-pointer" onClick={() => router.push(`/post/${post._id}`)}>
+                  <div
+                    className="flex-grow cursor-pointer"
+                    onClick={() => router.push(`/post/${post._id}`)}
+                  >
                     <h4 className="text-xl font-semibold mb-2">{post.title}</h4>
                     <span className="text-xs mb-2 block">
                       {readingTime} min read
