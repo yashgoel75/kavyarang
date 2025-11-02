@@ -113,7 +113,7 @@ export default function Navigation() {
             className="relative group"
           >
             <icon.name
-              size={isMobile ? 25 : 35}
+              size={isMobile ? 30 : 35}
               className={`cursor-pointer hover:scale-125 transition border-b-2 pb-1 ${
                 icon.url == "account" && isAccountPage
                   ? "border-yellow-700"
