@@ -90,7 +90,7 @@ export default function PostCard({
           onClick={() => {
             showShareOptions
               ? setShowShareOptions(false)
-              : router.push(`/user/${userData?.username}`);
+              : router.push(`/user/${post.author.username}`);
           }}
         >
           {post.author.profilePicture ? (

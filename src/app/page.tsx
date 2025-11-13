@@ -31,36 +31,13 @@ export default function Home() {
 
   return (
     <main className="main-container bg-[#2E2B26] flex flex-col items-center justify-center min-h-screen p-4">
-      <span className="text-4xl text-[#D8C3A5] dm-serif-display-regular-italic">
-        <GradientText
-          colors={[
-            "#9a6f0bff",
-            "#bd9864ff",
-            "#dbb56aff",
-            "#7f7464ff",
-            "#e9e99dff",
-          ]}
-          animationSpeed={5}
-          showBorder={false}
-          className="welcome-text"
-        >
-          Welcome to
-        </GradientText>
+      <span className="text-4xl dm-serif-display-regular-italic text-[#9a6f0bff]">
+        Welcome to
       </span>
-      <GradientText
-        colors={[
-          "#9a6f0bff",
-          "#bd9864ff",
-          "#dbb56aff",
-          "#7f7464ff",
-          "#e9e99dff",
-        ]}
-        animationSpeed={5}
-        showBorder={false}
-        className="kavyansh custom-class text-[65px] md:text-[100px]"
-      >
+
+      <span className="kavyansh custom-class text-[65px] md:text-[100px] text-[#9a6f0bff]">
         Kavyalok
-      </GradientText>
+      </span>
 
       {loading && (
         <div className="loader mt-8">
