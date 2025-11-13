@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { getAuth, signOut, onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Header() {
   const router = useRouter();
@@ -105,7 +106,7 @@ export default function Header() {
           showBorder={false}
           className="custom-class text-[35px] md:text-[65px] ml-1"
         >
-          Kavyalok
+          <Link href="/dashboard">Kavyalok</Link>
         </GradientText>
 
         <div className="flex items-center gap-3 md:gap-4">

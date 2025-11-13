@@ -8,6 +8,7 @@ import Link from "next/link";
 import Header from "../header/page";
 import Footer from "../footer/page";
 import { AtSign } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 
 export default function Member() {
   const router = useRouter();
@@ -312,7 +313,9 @@ export default function Member() {
                 </div>
               </div>
               <div className="flex items-center border-b-1 border-gray-300">
-                <span className="px-2 text-gray-600"><AtSign/></span>
+                <span className="px-2 text-gray-600">
+                  <AtSign />
+                </span>
                 <input
                   type="text"
                   name="username"
@@ -649,6 +652,29 @@ export default function Member() {
                 &nbsp; Passwords do not match.
               </div>
             ) : null}
+            <div className="text-sm bg-yellow-50 border border-yellow-200 rounded-xl p-4 shadow-sm">
+              <p className="font-medium text-yellow-800 mb-2 flex items-center gap-2">
+                Password requirements:
+              </p>
+              <ul className="space-y-1 text-yellow-900">
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-yellow-500" />
+                  Must be at least 8 characters long
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-yellow-500" />
+                  Include at least one uppercase letter
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-yellow-500" />
+                  Include at least one lowercase letter
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-yellow-500" />
+                  Include at least one special character
+                </li>
+              </ul>
+            </div>
             <div className="text-center mt-3">
               <button
                 type="submit"
@@ -675,7 +701,7 @@ export default function Member() {
           </Link>
         </div>
       </div>
-      <Footer/>
+      <Footer />
     </>
   );
 }
