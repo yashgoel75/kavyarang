@@ -59,7 +59,7 @@ export default function Home() {
         showBorder={false}
         className="kavyansh custom-class text-[65px] md:text-[100px]"
       >
-        kavyansh
+        Kavyalok
       </GradientText>
 
       {loading && (

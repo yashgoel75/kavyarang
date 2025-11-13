@@ -105,7 +105,7 @@ export default function Header() {
           showBorder={false}
           className="custom-class text-[35px] md:text-[65px] ml-1"
         >
-          kavyansh
+          Kavyalok
         </GradientText>
 
         <div className="flex items-center gap-3 md:gap-4">

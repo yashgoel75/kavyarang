@@ -15,7 +15,7 @@ export default function Header() {
         showBorder={false}
         className="custom-class text-[65px] md:text-[70px] mt-2"
       >
-        kavyansh
+        Kavyalok
       </GradientText>
     </>
   );

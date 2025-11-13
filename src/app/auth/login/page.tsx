@@ -153,8 +153,7 @@ export default function Login() {
                           ? post.content.slice(0, 120) + "..."
                           : post.content,
                     }}
-                  >
-                  </p>
+                  ></p>
                 </div>
               ))}
             </div>
@@ -163,16 +162,17 @@ export default function Login() {
               {[...posts, ...posts]?.map((post, index) => (
                 <div key={`${post._id}-rev-${index}`} className="post-card">
                   <h3>{post.title}</h3>
-                  <p dangerouslySetInnerHTML={{
+                  <p
+                    dangerouslySetInnerHTML={{
                       __html:
                         post.content?.length > 120
                           ? post.content.slice(0, 120) + "..."
                           : post.content,
-                    }}></p>
+                    }}
+                  ></p>
                 </div>
               ))}
             </div>
-            
           </div>
         </div>
 

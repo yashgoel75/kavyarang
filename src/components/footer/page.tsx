@@ -18,7 +18,7 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
         <div>
           <Link className="focus:outline-none" href={"/"}>
-            <Image src={logo} width={150} alt="Kavyansh"></Image>
+            <span className="custom-class text-[30px]">Kavyalok</span>
           </Link>
         </div>
         <div>
@@ -103,7 +103,7 @@ export default function Footer() {
       </div>
 
       <div className="text-center text-sm md:text-base mt-10 border-t border-gray-300 pt-5">
-        © {year} Kavyansh. All rights reserved.
+        © {year} Kavyalok. All rights reserved.
       </div>
     </footer>
   );
