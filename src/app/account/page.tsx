@@ -54,15 +54,59 @@ export default function Account() {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user?.email) {
         setFirebaseUser(user);
-        fetchUserData(user.email);
+
+        const cached = localStorage.getItem("userData");
+        const cachedAt = localStorage.getItem("userDataCachedAt");
+        const oneHour = 60 * 60 * 1000;
+
+        // Check if cache exists and is still valid
+        const isCacheValid =
+          cached && cachedAt && Date.now() - Number(cachedAt) < oneHour;
+
+        if (isCacheValid) {
+          // Use cached data
+          try {
+            const parsed = JSON.parse(cached);
+            setUserData(parsed);
+            setFormData(parsed);
+            setLoading(false);
+            console.log("Using cached data"); // Debug log
+          } catch (error) {
+            console.error("Cache parse error:", error);
+            // If cache is corrupted, fetch fresh data
+            fetchUserData(user.email)
+              .then((data) => {
+                if (data) {
+                  localStorage.setItem("userData", JSON.stringify(data));
+                  localStorage.setItem(
+                    "userDataCachedAt",
+                    Date.now().toString()
+                  );
+                }
+              })
+              .finally(() => setLoading(false));
+          }
+        } else {
+          // Cache doesn't exist or is expired, fetch fresh data
+          console.log("Fetching fresh data"); // Debug log
+          fetchUserData(user.email)
+            .then((data) => {
+              if (data) {
+                localStorage.setItem("userData", JSON.stringify(data));
+                localStorage.setItem("userDataCachedAt", Date.now().toString());
+              }
+            })
+            .finally(() => setLoading(false));
+        }
       } else {
         router.replace("/");
       }
     });
-    return () => unsubscribe();
-  }, []);
 
-  const fetchUserData = async (email: string) => {
+    return () => unsubscribe();
+  }, [router]);
+
+  const fetchUserData = async (email: string): Promise<User | null> => {
     try {
       const res = await fetch(
         `/api/user/posts?email=${encodeURIComponent(email)}`
@@ -71,10 +115,10 @@ export default function Account() {
       if (!res.ok) throw new Error(data.error || "Failed to load user data");
       setUserData(data.user);
       setFormData(data.user);
+      return data.user;
     } catch (err) {
       console.error(err);
-    } finally {
-      setLoading(false);
+      return null;
     }
   };
 
@@ -83,7 +127,7 @@ export default function Account() {
 
     if (formData?.username !== userData?.username) {
       if (!usernameAvailable || usernameAlreadyTaken) {
-        alert("Please choose an available username.");
+        console.error("Please choose an available username.");
         return;
       }
     }
@@ -119,9 +163,10 @@ export default function Account() {
       setIsEdit(false);
       setUsernameAvailable(true);
       setUsernameAlreadyTaken(false);
+      localStorage.setItem("userData", JSON.stringify(data.user));
+      localStorage.setItem("userDataCachedAt", Date.now().toString());
     } catch (err) {
-      console.error(err);
-      alert("Failed to update account.");
+      console.error("Failed to update account.", err);
     } finally {
       setIsUpdating(false);
     }
@@ -186,9 +231,6 @@ export default function Account() {
   const handleDelete = async (postId: string) => {
     if (!firebaseUser) return;
 
-    const confirmDelete = confirm("Are you sure you want to delete this post?");
-    if (!confirmDelete) return;
-
     try {
       const res = await fetch(`/api/user/posts`, {
         method: "DELETE",
@@ -212,10 +254,9 @@ export default function Account() {
         };
       });
 
-      alert("Post deleted successfully.");
+      console.log("Post deleted successfully.");
     } catch (err) {
-      console.error(err);
-      alert("Failed to delete post.");
+      console.error("Failed to delete post.", err);
     }
   };
 
@@ -228,7 +269,7 @@ export default function Account() {
     }, 800);
 
     return () => clearTimeout(delay);
-  }, [formData?.username]);
+  }, [formData?.username, userData?.username]);
 
   const handleProfilePictureChange = async (
     e: React.ChangeEvent<HTMLInputElement>
@@ -264,8 +305,7 @@ export default function Account() {
         posts: prev?.posts || [],
       }));
     } catch (err) {
-      console.error(err);
-      alert("Failed to upload profile picture.");
+      console.error("Failed to upload profile picture.", err);
     } finally {
       setIsUploadingImage(false);
     }

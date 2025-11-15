@@ -27,15 +27,41 @@ export default function Header() {
 
   const fetchUserName = async (email: string) => {
     try {
+      const cachedData = localStorage.getItem("userData");
+      const cachedAt = localStorage.getItem("userDataCachedAt");
+      const oneHour = 60 * 60 * 1000;
+
+      const isCacheValid = cachedData && cachedAt && (Date.now() - Number(cachedAt) < oneHour);
+
+      if (isCacheValid) {
+        const parsed = JSON.parse(cachedData);
+        if (parsed?.name) {
+          setDisplayName(parsed.name);
+          return;
+        }
+      }
+
       const response = await fetch(
         `/api/user?email=${encodeURIComponent(email)}`
       );
       const data = await response.json();
       if (!response.ok)
         throw new Error(data.error || "Failed to fetch user name");
-      if (data?.name) setDisplayName(data.name);
+      
+      if (data?.name) {
+        setDisplayName(data.name);
+        
+        const existingCache = localStorage.getItem("userData");
+        if (existingCache) {
+          const parsed = JSON.parse(existingCache);
+          localStorage.setItem("userData", JSON.stringify({ ...parsed, name: data.name }));
+        } else {
+          localStorage.setItem("userData", JSON.stringify({ name: data.name }));
+          localStorage.setItem("userDataCachedAt", Date.now().toString());
+        }
+      }
     } catch (err) {
-      console.error("Error fetching user name:", err);
+      console.error("Header: Error fetching user name:", err);
     }
   };
 
@@ -43,6 +69,8 @@ export default function Header() {
     try {
       await signOut(getAuth());
       setUser(null);
+      localStorage.removeItem("userData");
+      localStorage.removeItem("userDataCachedAt");
       router.replace("/");
     } catch (err) {
       console.error("Logout error:", err);
