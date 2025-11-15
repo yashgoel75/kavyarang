@@ -201,6 +201,8 @@ export default function Dashboard() {
           body: JSON.stringify({
             email: firebaseUser.email,
             postIds: newPostIds,
+            page,
+            limit: 9,
           }),
           headers: { "Content-Type": "application/json" },
         });
