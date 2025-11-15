@@ -13,9 +13,9 @@ export async function POST(req: NextRequest) {
 
   try {
     const { data } = await resend.emails.send({
-      from: "Kavyansh <noreply@cleit.in>",
+      from: "Kavyalok <noreply@cleit.in>",
       to: email,
-      subject: "Welcome to Kavyansh - OTP Verification",
+      subject: "Welcome to Kavyalok - OTP Verification",
       html: `
       <div style="background-color: #faf7f2; padding: 20px; font-family: Arial, sans-serif;">
       
@@ -28,10 +28,10 @@ export async function POST(req: NextRequest) {
        style="width: 180px; height: auto;">
 </div>
           
-          <h1 style="color: #2d2d2d; text-align: center;">Welcome to Kavyansh!</h1>
+          <h1 style="color: #2d2d2d; text-align: center;">Welcome to Kavyalok!</h1>
           
           <p style="color: #555; font-size: 16px; line-height: 1.6; text-align: left;">
-            We’re thrilled to have you join <strong>Kavyansh</strong> — a creative home for writers, poets, and storytellers.  
+            We’re thrilled to have you join <strong>Kavyalok</strong> — a creative home for writers, poets, and storytellers.  
             To continue your journey and verify your email, please use the OTP below:
           </p>
 
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
           </p>
           
           <p style="color: #2d2d2d; font-size: 14px; text-align: left; margin-top: 35px;">
-            With creativity,<br>Team Kavyansh
+            With creativity,<br>Team Kavyalok
           </p>
 
         </div>
