@@ -21,15 +21,13 @@
   gap: 2rem;
   width: max-content;
   animation: scroll-left 60s linear infinite;
+  animation-play-state: running;
   will-change: transform;
 }
 
 .marquee-right {
   animation: scroll-right 70s linear infinite;
-}
-
-.marquee:hover {
-  animation-play-state: paused;
+  animation-play-state: running;
 }
 
 @keyframes scroll-left {

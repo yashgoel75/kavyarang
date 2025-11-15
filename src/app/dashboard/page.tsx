@@ -1,18 +1,22 @@
 "use client";
 
-import Header from "@/components/header/page";
 import Navigation from "@/components/navigation/page";
-import { Send } from "lucide-react";
+import { LogOut, Search, Send, UserIcon, Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
-import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
+import {
+  getAuth,
+  signOut,
+  onAuthStateChanged,
+  User as FirebaseUser,
+} from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
-import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import snapchat from "../../../public/snapchat.png";
 import instagram from "../../../public/instagram.png";
 import Link from "next/link";
 import PostCard from "./PostCard";
+import GradientText from "@/components/GradientText";
 
 interface Post {
   _id: string;
@@ -58,6 +62,64 @@ export default function Dashboard() {
   const [hasMore, setHasMore] = useState(true);
   const [loadingPosts, setLoadingPosts] = useState(false);
 
+  const [displayName, setDisplayName] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(getAuth());
+      setUser(null);
+      router.replace("/");
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  };
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const handleSearch = () => {
+    if (searchQuery.trim() === "") return;
+    router.push(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const menu = document.querySelector(".menu-dropdown");
+      const icon = document.querySelector(".user-icon-btn");
+      if (
+        menu &&
+        !menu.contains(e.target as Node) &&
+        icon &&
+        !icon.contains(e.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+    if (isOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
+
+  const renderSearch = () => (
+    <>
+      <Search color="gray" size={20} />
+      <input
+        className="mx-3 h-full w-full focus:outline-none bg-transparent"
+        placeholder="Search stories, authors, or topics..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+      />
+    </>
+  );
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
@@ -69,7 +131,7 @@ export default function Dashboard() {
       }
     });
     return () => unsubscribe();
-  }, []);
+  }, [router]);
 
   const fetchUserData = async (email: string) => {
     try {
@@ -121,7 +183,7 @@ export default function Dashboard() {
     };
 
     fetchPosts();
-  }, [page, userData]);
+  }, [page, userData, loadingPosts, hasMore]);
 
   useEffect(() => {
     if (!firebaseUser || !posts?.length) return;
@@ -170,7 +232,7 @@ export default function Dashboard() {
     };
 
     fetchInteractions();
-  }, [firebaseUser, posts]);
+  }, [firebaseUser, posts, fetchedInteractionIds]);
 
   const handleLike = async (postId: string) => {
     if (!firebaseUser) return;
@@ -244,154 +306,246 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <Header />
-
+    <div className="min-h-screen flex flex-col bg-white">
       <div className="flex flex-1 relative">
-        <aside
-          className={`fixed md:static top-16 left-0 z-40 h-[calc(100vh-4rem)] bg-white border-r border-gray-200 shadow-lg
-          transform transition-transform duration-300 ease-in-out
+        <div
+          className={`absolute ${
+            isMobile ? "w-full px-7" : ""
+          } md:static top-16 left-0 z-40 border-r border-gray-200 h-[calc(100vh-4rem)] bg-white shadow-lg
+          transform transition-transform duration-300 ease-in-out overflow-y-auto z-1000
           ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
           } 
-          w-80 overflow-hidden`}
+          w-80 min-h-screen max-h-screen`}
         >
-          <div className="h-full flex flex-col">
-            <button
-              className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full md:hidden z-10"
-              onClick={() => setSidebarOpen(false)}
-            >
-              <X size={20} />
-            </button>
+          <aside>
+            <div className="h-full flex flex-col">
+              <span className="text-center custom-class text-[50px] mt-3">
+                <GradientText
+                  colors={[
+                    "#9a6f0bff",
+                    "#bd9864ff",
+                    "#dbb56aff",
+                    "#7f7464ff",
+                    "#e9e99dff",
+                  ]}
+                  animationSpeed={5}
+                  showBorder={false}
+                >
+                  <Link href="/dashboard">Kavyalok</Link>
+                </GradientText>
+              </span>
 
-            {loading ? (
-              <div className="flex items-center justify-center h-full">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-              </div>
-            ) : userData ? (
-              <div className="flex flex-col h-full">
-                <div className="relative">
-                  <div className="h-32 bg-white"></div>
-                  <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2">
-                    <img
-                      src={
-                        userData.profilePicture ||
-                        `https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.email}`
-                      }
-                      alt={userData.name}
-                      className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover bg-white"
-                    />
-                  </div>
+              {loading ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 mt-15 border-yellow-500"></div>
                 </div>
+              ) : userData ? (
+                <div className="flex flex-col h-full bg-white">
+                  <div className="relative">
+                    <div className="h-25 bg-white"></div>
+                    <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2">
+                      <img
+                        src={
+                          userData.profilePicture ||
+                          `https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.email}`
+                        }
+                        alt={userData.name}
+                        className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover bg-white"
+                      />
+                    </div>
+                  </div>
 
-                <div className="pt-20 px-6 pb-4 text-center border-b border-gray-100">
-                  <h2 className="text-2xl font-bold text-gray-800">
-                    {userData.name}
-                  </h2>
-                  <p className="text-sm text-gray-500 mt-1">
-                    @{userData.username}
-                  </p>
-                  {userData.bio && (
-                    <p className="text-sm text-gray-600 mt-3 leading-relaxed">
-                      {userData.bio}
+                  <div className="pt-20 px-6 pb-4 text-center border-b border-gray-100">
+                    <h2 className="text-2xl font-bold text-gray-800">
+                      {userData.name}
+                    </h2>
+                    <p className="text-sm text-gray-500 mt-1">
+                      @{userData.username}
                     </p>
+                    {userData.bio && (
+                      <p className="text-sm text-gray-600 mt-3 leading-relaxed">
+                        {userData.bio}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4 px-6 py-4 border-b border-gray-100">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-gray-800">
+                        {userData.posts?.length || 0}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">Posts</div>
+                    </div>
+                    <Link href="/account">
+                      <div className="text-center cursor-pointer">
+                        <div className="text-2xl font-bold text-gray-800">
+                          {userData.followers?.length || 0}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          Followers
+                        </div>
+                      </div>
+                    </Link>
+                    <Link href="/account">
+                      <div className="text-center cursor-pointer">
+                        <div className="text-2xl font-bold text-gray-800">
+                          {userData.following?.length || 0}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          Following
+                        </div>
+                      </div>
+                    </Link>
+                  </div>
+
+                  {(userData.instagram || userData.snapchat) && (
+                    <div className="px-6 py-4 space-y-3">
+                      {userData.instagram && (
+                        <a
+                          href={`https://instagram.com/${userData.instagram}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 px-5 py-2 rounded-xl bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 text-white shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1"
+                        >
+                          <Image
+                            src={instagram}
+                            width={25}
+                            height={25}
+                            alt="Instagram"
+                          />
+                          <span className="font-medium truncate">
+                            {userData.instagram}
+                          </span>
+                        </a>
+                      )}
+                      {userData.snapchat && (
+                        <a
+                          href={`https://snapchat.com/add/${userData.snapchat}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 px-5 py-2 rounded-xl bg-[#f5ec00] text-black shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1"
+                        >
+                          <Image
+                            src={snapchat}
+                            width={25}
+                            height={25}
+                            alt="Snapchat"
+                          />
+                          <span className="font-medium truncate">
+                            {userData.snapchat}
+                          </span>
+                        </a>
+                      )}
+                    </div>
                   )}
-                </div>
 
-                <div className="grid grid-cols-3 gap-4 px-6 py-4 border-b border-gray-100">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-800">
-                      {userData.posts?.length || 0}
-                    </div>
-                    <div className="text-xs text-gray-500 mt-1">Posts</div>
+                  <div className="px-6">
+                    <Link href="/account">
+                      <button className="cursor-pointer w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all font-medium">
+                        View Profile
+                      </button>
+                    </Link>
                   </div>
-                  <Link href="/account">
-                    <div className="text-center cursor-pointer">
-                      <div className="text-2xl font-bold text-gray-800">
-                        {userData.followers?.length || 0}
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        Followers
-                      </div>
-                    </div>
-                  </Link>
-                  <Link href="/account">
-                    <div className="text-center cursor-pointer">
-                      <div className="text-2xl font-bold text-gray-800">
-                        {userData.following?.length || 0}
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        Following
-                      </div>
-                    </div>
-                  </Link>
                 </div>
-
-                {(userData.instagram || userData.snapchat) && (
-                  <div className="px-6 py-4 space-y-3">
-                    {userData.instagram && (
-                      <a
-                        href={`https://instagram.com/${userData.instagram}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 px-5 py-2 rounded-xl bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 text-white shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1"
-                      >
-                        <Image
-                          src={instagram}
-                          width={25}
-                          height={25}
-                          alt="Instagram"
-                        />
-                        <span className="font-medium truncate">
-                          {userData.instagram}
-                        </span>
-                      </a>
-                    )}
-                    {userData.snapchat && (
-                      <a
-                        href={`https://snapchat.com/add/${userData.snapchat}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 px-5 py-2 rounded-xl bg-[#f5ec00] text-black shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1"
-                      >
-                        <Image
-                          src={snapchat}
-                          width={25}
-                          height={25}
-                          alt="Snapchat"
-                        />
-                        <span className="font-medium truncate">
-                          {userData.snapchat}
-                        </span>
-                      </a>
-                    )}
-                  </div>
-                )}
-
-                <div className="px-6 mt-25">
-                  <Link href="/account">
-                    <button className="cursor-pointer w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all font-medium">
-                      View Profile
-                    </button>
-                  </Link>
+              ) : (
+                <div className="flex items-center justify-center h-full text-gray-500">
+                  Failed to load profile
                 </div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center h-full text-gray-500">
-                Failed to load profile
-              </div>
-            )}
-          </div>
-        </aside>
-
+              )}
+            </div>
+          </aside>
+        </div>
         {sidebarOpen && (
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+            className="fixed inset-0 bg-opacity-50 z-30 md:hidden"
             onClick={() => setSidebarOpen(false)}
           ></div>
         )}
 
         <main className="flex-1 h-[calc(100vh-4rem)] overflow-y-auto md:ml-0 pb-20">
+          <header className="sticky top-0 z-50 bg-white">
+            <div className="flex items-center justify-between px-4 md:px-6 h-16">
+              <button
+                className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition"
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+              >
+                {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+
+              <div className="flex items-center gap-3 md:gap-4 ml-auto">
+                {isMobile ? (
+                  <>
+                    <button
+                      className="cursor-pointer hover:bg-gray-100 p-2 rounded-md transition active:scale-95"
+                      onClick={() => setIsSearchOpen(!isSearchOpen)}
+                    >
+                      <Search size={22} />
+                    </button>
+                    {isSearchOpen && (
+                      <div className="absolute top-16 left-0 right-0 bg-white border-b border-gray-200 p-4 shadow-md">
+                        <div className="flex items-center bg-gray-100 border border-gray-300 px-3 rounded-xl h-[40px]">
+                          {renderSearch()}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="flex items-center bg-gray-100 border border-gray-300 px-3 rounded-xl h-[40px] w-[500px]">
+                    {renderSearch()}
+                  </div>
+                )}
+
+                <div className="relative">
+                  {user ? (
+                    <>
+                      <button
+                        className="user-icon-btn p-2 rounded-full hover:bg-gray-100 cursor-pointer transition active:scale-95"
+                        onClick={() => setIsOpen((prev) => !prev)}
+                      >
+                        <UserIcon size={25} strokeWidth={1.75} />
+                      </button>
+
+                      {isOpen && (
+                        <div className="absolute right-0 mt-2 min-w-[160px] bg-white border border-gray-200 rounded-md shadow-lg z-50 menu-dropdown">
+                          <div className="px-4 py-2 border-b border-gray-200">
+                            <p className="font-semibold">
+                              {displayName || "User"}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              {user.email}
+                            </p>
+                          </div>
+                          <button
+                            onClick={handleLogout}
+                            className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2 cursor-pointer"
+                          >
+                            <LogOut size={16} />
+                            Logout
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="flex gap-2 h-[40px]">
+                      <button
+                        onClick={() => router.push("/auth/login")}
+                        className="flex items-center rounded-lg bg-gradient-to-br from-[#9a6f0bff] to-[#dbb56aff] text-white px-4 text-sm py-1 cursor-pointer"
+                      >
+                        Login
+                      </button>
+                      <button
+                        onClick={() => router.push("/auth/register")}
+                        className="px-3 py-1 border border-gray-300 rounded-lg text-sm cursor-pointer"
+                      >
+                        Register
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </header>
           <div className="max-w-6xl mx-auto p-6">
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-gray-800 mb-2">
@@ -422,7 +576,7 @@ export default function Dashboard() {
                 ))
               ) : (
                 <div className="col-span-full flex flex-col items-center justify-center py-20">
-                  <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mb-4"></div>
+                  <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-yellow-500 mb-4"></div>
                   <p className="text-gray-500">Loading posts...</p>
                 </div>
               )}

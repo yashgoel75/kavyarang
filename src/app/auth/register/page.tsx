@@ -412,6 +412,7 @@ export default function Member() {
                 <button
                   type="button"
                   onClick={() => sendEmailOtp()}
+                  disabled={otpSending || otpSent}
                   className={`bg-gradient-to-br from-[#9a6f0bff] to-[#dbb56aff] w-[30%] lg:w-[20%] outline-none text-white px-1 md:px-2 lg:px-4 md:px-2 lg:px-4 py-2 rounded-md mb-1 hover:from-[#b8870b] hover:to-[#f0c96c] ${
                     otpSent || otpSending
                       ? "hover:cursor-not-allowed opacity-50"
