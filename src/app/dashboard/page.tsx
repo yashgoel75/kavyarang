@@ -122,18 +122,60 @@ export default function Dashboard() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
       if (user?.email) {
-        fetchUserData(user.email);
         setFirebaseUser(user);
+
+        const cached = localStorage.getItem("userData");
+        const cachedAt = localStorage.getItem("userDataCachedAt");
+        const oneHour = 60 * 60 * 1000;
+
+        // Check if cache exists and is still valid
+        const isCacheValid =
+          cached && cachedAt && Date.now() - Number(cachedAt) < oneHour;
+
+        if (isCacheValid) {
+          // Use cached data
+          try {
+            const parsed = JSON.parse(cached);
+            setUserData(parsed);
+            setLoading(false);
+            console.log("Using cached data"); // Debug log
+          } catch (error) {
+            console.error("Cache parse error:", error);
+            // If cache is corrupted, fetch fresh data
+            fetchUserData(user.email)
+              .then((data) => {
+                if (data) {
+                  localStorage.setItem("userData", JSON.stringify(data));
+                  localStorage.setItem(
+                    "userDataCachedAt",
+                    Date.now().toString()
+                  );
+                }
+              })
+              .finally(() => setLoading(false));
+          }
+        } else {
+          // Cache doesn't exist or is expired, fetch fresh data
+          console.log("Fetching fresh data"); // Debug log
+          fetchUserData(user.email)
+            .then((data) => {
+              if (data) {
+                localStorage.setItem("userData", JSON.stringify(data));
+                localStorage.setItem("userDataCachedAt", Date.now().toString());
+              }
+            })
+            .finally(() => setLoading(false));
+        }
       } else {
         router.replace("/");
       }
     });
+
     return () => unsubscribe();
   }, [router]);
 
-  const fetchUserData = async (email: string) => {
+  const fetchUserData = async (email: string): Promise<User | null> => {
     try {
       const res = await fetch(
         `/api/user/posts?email=${encodeURIComponent(email)}`
@@ -141,10 +183,10 @@ export default function Dashboard() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load user data");
       setUserData(data.user);
+      return data.user;
     } catch (err) {
       console.error(err);
-    } finally {
-      setLoading(false);
+      return null;
     }
   };
 
