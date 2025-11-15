@@ -512,7 +512,7 @@ export default function Dashboard() {
                         <div className="absolute right-0 mt-2 min-w-[160px] bg-white border border-gray-200 rounded-md shadow-lg z-50 menu-dropdown">
                           <div className="px-4 py-2 border-b border-gray-200">
                             <p className="font-semibold">
-                              {displayName || "User"}
+                              {userData?.name || "User"}
                             </p>
                             <p className="text-sm text-gray-500">
                               {user.email}
