@@ -124,7 +124,7 @@ export default function Dashboard() {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user?.email) {
         setFirebaseUser(user);
-
+        setUser(user);
         const cached = localStorage.getItem("userData");
         const cachedAt = localStorage.getItem("userDataCachedAt");
         const oneHour = 60 * 60 * 1000;
