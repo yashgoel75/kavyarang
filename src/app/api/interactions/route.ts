@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { register } from "@/instrumentation";
 import { User } from "../../../../db/schema";
+import redis from "@/lib/redis";
 
 interface UserDocument {
   likes?: string[];
@@ -33,33 +34,40 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Email required" }, { status: 400 });
     }
 
+    const postIds: string[] = postIdsParam ? JSON.parse(postIdsParam) : [];
+
+    const cacheKey = `interactions:${email}:${page}:${limit}:${JSON.stringify(postIds)}`;
+
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+      return NextResponse.json(cached);
+    }
+
     const user = await User.findOne({ email }).lean();
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const userObj = user as UserDocument;
-    const postIds: string[] = postIdsParam ? JSON.parse(postIdsParam) : [];
+    const u = user as UserDocument;
 
-    const likesAll = (userObj.likes || []).filter(id => postIds.includes(id));
-    const bookmarksAll = (userObj.bookmarks || []).filter(id =>
-      postIds.includes(id)
-    );
+    const likesAll = (u.likes || []).filter(id => postIds.includes(id));
+    const bookmarksAll = (u.bookmarks || []).filter(id => postIds.includes(id));
 
     const likes = paginate(likesAll, page, limit);
     const bookmarks = paginate(bookmarksAll, page, limit);
 
-    return NextResponse.json(
-      {
-        likes: likes.data,
-        bookmarks: bookmarks.data,
-        totalLikes: likes.total,
-        totalBookmarks: bookmarks.total,
-        hasMoreLikes: likes.hasMore,
-        hasMoreBookmarks: bookmarks.hasMore,
-      },
-      { status: 200 }
-    );
+    const response = {
+      likes: likes.data,
+      bookmarks: bookmarks.data,
+      totalLikes: likes.total,
+      totalBookmarks: bookmarks.total,
+      hasMoreLikes: likes.hasMore,
+      hasMoreBookmarks: bookmarks.hasMore,
+    };
+
+    await redis.set(cacheKey, response, { ex: 300 });
+
+    return NextResponse.json(response);
   } catch (err) {
     console.error("Error checking interactions:", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
@@ -79,34 +87,38 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const cacheKey = `interactions:${email}:${page}:${limit}:${JSON.stringify(postIds)}`;
+
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+      return NextResponse.json(cached);
+    }
+
     const user = await User.findOne({ email }).lean();
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const userObj = user as UserDocument;
+    const u = user as UserDocument;
 
-    const likesAll = (userObj.likes || []).filter(id =>
-      postIds.includes(id)
-    );
-    const bookmarksAll = (userObj.bookmarks || []).filter(id =>
-      postIds.includes(id)
-    );
+    const likesAll = (u.likes || []).filter(id => postIds.includes(id));
+    const bookmarksAll = (u.bookmarks || []).filter(id => postIds.includes(id));
 
     const likes = paginate(likesAll, page, limit);
     const bookmarks = paginate(bookmarksAll, page, limit);
 
-    return NextResponse.json(
-      {
-        likes: likes.data,
-        bookmarks: bookmarks.data,
-        totalLikes: likes.total,
-        totalBookmarks: bookmarks.total,
-        hasMoreLikes: likes.hasMore,
-        hasMoreBookmarks: bookmarks.hasMore,
-      },
-      { status: 200 }
-    );
+    const response = {
+      likes: likes.data,
+      bookmarks: bookmarks.data,
+      totalLikes: likes.total,
+      totalBookmarks: bookmarks.total,
+      hasMoreLikes: likes.hasMore,
+      hasMoreBookmarks: bookmarks.hasMore,
+    };
+
+    await redis.set(cacheKey, response, { ex: 300 });
+
+    return NextResponse.json(response);
   } catch (err) {
     console.error("Error checking interactions (POST):", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });

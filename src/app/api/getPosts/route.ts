@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { User, Post } from "../../../../db/schema";
 import { register } from "@/instrumentation";
+import redis from "@/lib/redis";
 
-interface Post {
-    _id: string;
-    title: string;
-    content: string;
-    picture?: string;
-    likes: number;
-    color: string;
+interface PostType {
+  _id: string;
+  title: string;
+  content: string;
+  picture?: string;
+  likes: number;
+  color: string;
 }
 
 export async function GET(req: Request) {
@@ -20,6 +21,13 @@ export async function GET(req: Request) {
 
   const skip = (page - 1) * limit;
 
+  const cacheKey = `posts:page:${page}:limit:${limit}`;
+
+  const cached = await redis.get(cacheKey);
+  if (cached) {
+    return NextResponse.json(cached);
+  }
+
   const posts = await Post.find({})
     .sort({ createdAt: -1 })
     .skip(skip)
@@ -28,10 +36,13 @@ export async function GET(req: Request) {
 
   const total = await Post.countDocuments();
 
-  return NextResponse.json({
+  const response = {
     posts,
     total,
     hasMore: skip + limit < total,
-  });
-}
+  };
 
+  await redis.set(cacheKey, response, { ex: 300 });
+
+  return NextResponse.json(response);
+}

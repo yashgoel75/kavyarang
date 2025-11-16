@@ -225,7 +225,7 @@ export default function Dashboard() {
     };
 
     fetchPosts();
-  }, [page, userData, loadingPosts, hasMore]);
+  }, [page, userData]);
 
   useEffect(() => {
     if (!firebaseUser || !posts?.length) return;
