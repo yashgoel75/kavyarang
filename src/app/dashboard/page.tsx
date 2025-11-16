@@ -72,6 +72,8 @@ export default function Dashboard() {
     try {
       await signOut(getAuth());
       setUser(null);
+      localStorage.removeItem("userData");
+      localStorage.removeItem("userDataCachedAt");
       router.replace("/");
     } catch (err) {
       console.error("Logout error:", err);
