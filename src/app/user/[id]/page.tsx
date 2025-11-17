@@ -62,15 +62,17 @@ export default function UserProfile() {
   const fetchUserData = async (username: string) => {
     try {
       const userRes = await fetch(`/api/getUser?username=${username}`);
-        const userData = await userRes.json();
-        console.log(userData.user);
-      if (!userRes.ok) throw new Error(userData.error || "Failed to load user profile");
+      const userData = await userRes.json();
+      console.log(userData.user);
+      if (!userRes.ok)
+        throw new Error(userData.error || "Failed to load user profile");
 
       const postsRes = await fetch(
         `/api/user/posts?email=${encodeURIComponent(userData.user.email)}`
       );
       const postsData = await postsRes.json();
-      if (!postsRes.ok) throw new Error(postsData.error || "Failed to load user posts");
+      if (!postsRes.ok)
+        throw new Error(postsData.error || "Failed to load user posts");
 
       setUserData(postsData.user);
 
@@ -102,7 +104,8 @@ export default function UserProfile() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to update follow status");
+      if (!res.ok)
+        throw new Error(data.error || "Failed to update follow status");
 
       setIsFollowing(!isFollowing);
       setUserData((prev) => {
@@ -170,7 +173,6 @@ export default function UserProfile() {
           <h2 className="text-4xl font-bold text-gray-800 mb-1">
             {isOwnProfile ? "My Account" : `${userData.name}'s Profile`}
           </h2>
-          <div className="h-0.5 w-20 bg-gradient-to-r from-[#bd9864ff] to-transparent"></div>
         </div>
 
         <div className="flex-1 space-y-4 md:flex justify-around gap-1 bg-white shadow-sm rounded-lg p-8 mb-8 border border-gray-100">
@@ -200,7 +202,9 @@ export default function UserProfile() {
                 <p className="text-gray-500">@{userData.username}</p>
                 {userData.bio && (
                   <div className="mt-4 pt-4 border-t border-gray-100">
-                    <p className="text-gray-700 italic">&apos;{userData.bio}&apos;</p>
+                    <p className="text-gray-700 italic">
+                      &apos;{userData.bio}&apos;
+                    </p>
                   </div>
                 )}
                 {!isOwnProfile && firebaseUser && (
@@ -233,7 +237,33 @@ export default function UserProfile() {
           </div>
           <div className="border-1 rounded-xl shadow-lg border-gray-100 p-5">
             <div className="flex flex-col gap-5">
-              <div className="flex flex-col gap-5">
+              <div className="flex gap-4 justify-around bg-gray-50 md:flex-col md:space-y-4 md:mt-3 px-3 py-5 rounded-lg shadow-xl">
+                <Link href={`/user/${userId}/friends`}>
+                  <div className="text-center cursor-pointer">
+                    <h3 className="text-2xl font-semibold text-gray-800">
+                      {userData.followers?.length || 0}
+                    </h3>
+                    <p>
+                      {userData.followers?.length === 1
+                        ? "follower"
+                        : "followers"}
+                    </p>
+                  </div>
+                </Link>
+                <Link href={`/user/${userId}/friends`}>
+                  <div className="text-center cursor-pointer">
+                    <h3 className="text-2xl font-semibold text-gray-800">
+                      {userData.following?.length || 0}
+                    </h3>
+                    <p>
+                      {userData.following?.length === 1
+                        ? "following"
+                        : "followings"}
+                    </p>
+                  </div>
+                </Link>
+              </div>
+              <div className="flex flex-col gap-5 mt-5 min-w-50">
                 {userData.instagram && (
                   <div>
                     <a
@@ -276,32 +306,6 @@ export default function UserProfile() {
                     </a>
                   </div>
                 )}
-              </div>
-              <div className="flex gap-4 justify-around bg-gray-50 md:flex-col md:space-y-4 md:mt-3 px-3 py-5 rounded-lg shadow-xl">
-                <Link href={`/user/${userId}/friends`}>
-                <div className="text-center cursor-pointer">
-                  <h3 className="text-2xl font-semibold text-gray-800">
-                    {userData.followers?.length || 0}
-                  </h3>
-                  <p>
-                    {userData.followers?.length === 1
-                      ? "follower"
-                      : "followers"}
-                  </p>
-                  </div>
-                </Link>
-                <Link href={`/user/${userId}/friends`}>
-                <div className="text-center cursor-pointer">
-                  <h3 className="text-2xl font-semibold text-gray-800">
-                    {userData.following?.length || 0}
-                  </h3>
-                  <p>
-                    {userData.following?.length === 1
-                      ? "following"
-                      : "followings"}
-                  </p>
-                  </div>
-                  </Link>
               </div>
             </div>
           </div>

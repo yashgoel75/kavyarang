@@ -371,7 +371,7 @@ export default function Account() {
         </div>
 
         <div className="flex-1 space-y-4 md:flex justify-around gap-1 bg-white shadow-sm rounded-xl p-2 md:p-8 mb-8 border border-gray-100">
-          <div className="border-1 lg:w-lg rounded-lg shadow-lg border-gray-100 p-5">
+          <div className="lg:w-lg  p-5">
             <div className="flex flex-col items-center space-y-6">
               <div className="relative">
                 <div className="relative w-32 h-32">
@@ -576,7 +576,34 @@ export default function Account() {
           </div>
           <div className="border-1 min-w-[300px] rounded-xl shadow-lg border-gray-100 p-5 inter-normal">
             <div className="flex flex-col space-y-4">
-              <div className="flex flex-col gap-5">
+              <div className="flex gap-4 justify-around bg-gray-50 md:flex-col md:space-y-4 md:mt-3 px-3 py-5 rounded-lg shadow-xl">
+                <Link href={"/account/friends"}>
+                  <div className="text-center cursor-pointer">
+                    <h3 className="text-2xl font-semibold text-gray-800">
+                      {userData.followers?.length || 0}
+                    </h3>
+                    <p>
+                      {userData.followers?.length == 1
+                        ? "follower"
+                        : "followers"}
+                    </p>
+                  </div>
+                </Link>
+                <Link href={"/account/friends"}>
+                  <div className="text-center cursor-pointer">
+                    <h3 className="text-2xl font-semibold text-gray-800">
+                      {userData.following?.length || 0}
+                    </h3>
+                    <p>
+                      {userData.following?.length == 1
+                        ? "following"
+                        : "followings"}
+                    </p>
+                  </div>
+                </Link>
+              </div>
+
+              <div className="flex flex-col gap-5 mt-5">
                 {userData.instagram ? (
                   <div>
                     <a
@@ -620,32 +647,6 @@ export default function Account() {
                     </a>
                   </div>
                 ) : null}
-              </div>
-              <div className="flex gap-4 justify-around bg-gray-50 md:flex-col md:space-y-4 md:mt-3 px-3 py-5 rounded-lg shadow-xl">
-                <Link href={"/account/friends"}>
-                  <div className="text-center cursor-pointer">
-                    <h3 className="text-2xl font-semibold text-gray-800">
-                      {userData.followers?.length || 0}
-                    </h3>
-                    <p>
-                      {userData.followers?.length == 1
-                        ? "follower"
-                        : "followers"}
-                    </p>
-                  </div>
-                </Link>
-                <Link href={"/account/friends"}>
-                  <div className="text-center cursor-pointer">
-                    <h3 className="text-2xl font-semibold text-gray-800">
-                      {userData.following?.length || 0}
-                    </h3>
-                    <p>
-                      {userData.following?.length == 1
-                        ? "following"
-                        : "followings"}
-                    </p>
-                  </div>
-                </Link>
               </div>
             </div>
           </div>
