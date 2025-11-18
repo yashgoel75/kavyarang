@@ -57,7 +57,7 @@ export default function Account() {
 
         const cached = localStorage.getItem("userData");
         const cachedAt = localStorage.getItem("userDataCachedAt");
-        const oneHour = 60 * 60 * 1000;
+        const oneHour = 1000;
 
         // Check if cache exists and is still valid
         const isCacheValid =
