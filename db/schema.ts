@@ -47,6 +47,7 @@ const UserSchema = new Schema({
     snapchat: String,
     followers: [String],
     following: [String],
+    isVerified: Boolean,
     likes: [String],
     notifications: [NotificationSchema],
 }, { timestamps: true });

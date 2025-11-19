@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Send } from "lucide-react";
+import { Check, Send } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
@@ -21,6 +21,7 @@ interface User {
   email: string;
   bio?: string;
   profilePicture?: string;
+  isVerified: boolean;
   posts?: Post[];
   snapchat: string;
   instagram: string;
@@ -94,13 +95,28 @@ export default function PostCard({
           }}
         >
           {post.author.profilePicture ? (
-            <Image
-              src={post.author.profilePicture}
-              alt={post.author.name}
-              width={40}
-              height={40}
-              className="rounded-full object-cover w-10 h-10"
-            />
+            <div className="relative">
+              <Image
+                src={post.author.profilePicture}
+                alt={post.author.name}
+                width={40}
+                height={40}
+                className={`rounded-full object-cover w-11 h-11 ${
+                  String(post.author.isVerified) == "true"
+                    ? "border-2 border-green-700"
+                    : ""
+                }`}
+              />
+
+              {post.author.isVerified && (
+                <div
+                  title="Verified"
+                  className="absolute bottom-0 -right-1 bg-green-700 rounded-full p-1 flex items-center justify-center"
+                >
+                  <Check color="white" size={12} />
+                </div>
+              )}
+            </div>
           ) : (
             <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-700 font-semibold text-sm">
               {getInitials(post.author.name)}

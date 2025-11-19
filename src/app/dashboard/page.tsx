@@ -37,6 +37,7 @@ interface User {
   posts?: Post[];
   snapchat: string;
   instagram: string;
+    isVerified: boolean;
   followers: string[];
   following: string[];
 }

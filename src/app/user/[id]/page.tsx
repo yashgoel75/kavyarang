@@ -12,6 +12,7 @@ import { useParams, useRouter } from "next/navigation";
 import snapchat from "../../../../public/snapchat.png";
 import instagram from "../../../../public/instagram.png";
 import Link from "next/link";
+import { Check } from "lucide-react";
 
 interface User {
   name: string;
@@ -20,6 +21,7 @@ interface User {
   bio?: string;
   profilePicture?: string;
   posts?: Post[];
+  isVerified: boolean;
   snapchat: string;
   instagram: string;
   followers: string[];
@@ -181,12 +183,26 @@ export default function UserProfile() {
               <div className="relative">
                 <div className="relative w-32 h-32">
                   {userData.profilePicture ? (
-                    <Image
-                      src={userData.profilePicture}
-                      alt={`${userData.name}'s profile`}
-                      fill
-                      className="rounded-full object-cover border-2 border-gray-200"
-                    />
+                    <>
+                      <Image
+                        src={userData.profilePicture}
+                        alt={`${userData.name}'s profile`}
+                        fill
+                        className={`rounded-full object-cover border-2 border-gray-200 ${
+                          String(userData.isVerified) == "true"
+                            ? "border-2 border-green-700"
+                            : ""
+                        }`}
+                      />
+                      {userData.isVerified && (
+                        <div
+                          title="Verified"
+                          className="absolute bottom-2 right-2 bg-green-700 rounded-full p-1 flex items-center justify-center"
+                        >
+                          <Check color="white" size={20} />
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <div className="w-32 h-32 rounded-full flex items-center justify-center bg-gradient-to-br from-[#bd9864ff] to-[#dbb56aff] text-3xl font-semibold text-white">
                       {userData.name.charAt(0).toUpperCase()}
