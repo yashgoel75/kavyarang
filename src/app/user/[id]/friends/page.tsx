@@ -8,12 +8,14 @@ import Header from "@/components/header/page";
 import Footer from "@/components/footer/page";
 import Navigation from "@/components/navigation/page";
 import Image from "next/image";
+import { Check } from "lucide-react";
 
 interface Friend {
   name: string;
   username: string;
   profilePicture?: string;
   email: string;
+  isVerified: boolean;
 }
 
 interface UserData {
@@ -123,6 +125,7 @@ export default function UserFriendsPage() {
               username: data.user.username,
               profilePicture: data.user.profilePicture,
               email: email,
+              isVerified: data.user.isVerified || false,
             });
           }
         } catch (err) {
@@ -146,15 +149,29 @@ export default function UserFriendsPage() {
           className="flex items-center gap-3 cursor-pointer"
           onClick={() => router.push(`/user/${friend.username}`)}
         >
-          <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center text-white font-medium">
+          <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-white font-medium">
             {friend.profilePicture ? (
-              <Image
-                src={friend.profilePicture}
-                alt={friend.name}
-                width={48}
-                height={48}
-                className="object-cover w-full h-full"
-              />
+              <div className="relative">
+                <Image
+                  src={friend.profilePicture}
+                  alt={friend.name}
+                  width={48}
+                  height={48}
+                  className={`rounded-full object-cover w-11 h-11 ${
+                    String(friend.isVerified) == "true"
+                      ? "border-2 border-green-700"
+                      : ""
+                  }`}
+                />
+                {friend.isVerified && (
+                  <div
+                    title="Verified"
+                    className="absolute bottom-0 -right-1 bg-green-700 rounded-full p-1 flex items-center justify-center"
+                  >
+                    <Check color="white" size={12} />
+                  </div>
+                )}
+              </div>
             ) : (
               friend.name.charAt(0).toUpperCase()
             )}

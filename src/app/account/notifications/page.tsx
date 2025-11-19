@@ -8,6 +8,7 @@ import Header from "@/components/header/page";
 import Footer from "@/components/footer/page";
 import Navigation from "@/components/navigation/page";
 import Image from "next/image";
+import { Check } from "lucide-react";
 
 interface Notification {
   id: string;
@@ -16,7 +17,12 @@ interface Notification {
   postId?: string;
   createdAt: string;
   read: boolean;
-  fromUser?: { name: string; username: string; profilePicture?: string };
+  fromUser?: {
+    name: string;
+    username: string;
+    profilePicture?: string;
+    isVerified: boolean;
+  };
 }
 
 export default function NotificationsPage() {
@@ -115,17 +121,37 @@ export default function NotificationsPage() {
                 className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm hover:bg-gray-50 transition cursor-pointer"
                 onClick={() => handleNotificationClick(notif)}
               >
-                <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center text-white font-medium">
+                <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-white font-medium">
                   {notif.fromUser?.profilePicture ? (
-                    <Image
-                      src={notif.fromUser.profilePicture}
-                      alt={notif.fromUser.name}
-                      width={48}
-                      height={48}
-                      className="object-cover w-full h-full"
-                    />
+                    <div className="relative">
+                      <Image
+                        src={notif.fromUser.profilePicture}
+                        alt={notif.fromUser.name}
+                        width={48}
+                        height={48}
+                        className="object-cover w-full h-full"
+                      />
+                      {notif.fromUser.isVerified && (
+                        <div
+                          title="Verified"
+                          className="absolute bottom-0 -right-1 bg-green-700 rounded-full p-1 flex items-center justify-center"
+                        >
+                          <Check color="white" size={12} />
+                        </div>
+                      )}
+                    </div>
                   ) : (
-                    notif.fromUser?.name.charAt(0).toUpperCase()
+                    <div className="relative">
+                      notif.fromUser?.name.charAt(0).toUpperCase()
+                      {notif.fromUser?.isVerified && (
+                        <div
+                          title="Verified"
+                          className="absolute bottom-0 -right-1 bg-green-700 rounded-full p-1 flex items-center justify-center"
+                        >
+                          <Check color="white" size={12} />
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
                 <div>

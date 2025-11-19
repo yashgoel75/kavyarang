@@ -1,7 +1,7 @@
 "use client";
 
 import Navigation from "@/components/navigation/page";
-import { LogOut, Search, Send, UserIcon, Menu, X } from "lucide-react";
+import { LogOut, Search, Send, UserIcon, Menu, X, Check } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
   getAuth,
@@ -37,7 +37,7 @@ interface User {
   posts?: Post[];
   snapchat: string;
   instagram: string;
-    isVerified: boolean;
+  isVerified: boolean;
   followers: string[];
   following: string[];
 }
@@ -393,13 +393,21 @@ export default function Dashboard() {
                     <div className="h-25 bg-white"></div>
                     <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2">
                       <img
-                        src={
-                          userData.profilePicture ||
-                          `https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.email}`
-                        }
-                        alt={userData.name}
-                        className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover bg-white"
+                          src={
+                            userData.profilePicture ||
+                            `https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.email}`
+                          }
+                          alt={userData.name}
+                          className={`w-32 h-32 rounded-full shadow-lg object-cover bg-white ${userData.isVerified ? "border-4 border-green-700" : "border-4 border-white"}`}
                       />
+                      {userData.isVerified && (
+                        <div
+                          title="Verified"
+                          className="absolute bottom-2 right-2 bg-green-700 rounded-full p-1 flex items-center justify-center"
+                        >
+                          <Check color="white" size={20} />
+                        </div>
+                      )}
                     </div>
                   </div>
 
