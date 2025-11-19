@@ -1,5 +1,5 @@
 "use client";
-import { Home, Bookmark, User, Bell } from "lucide-react";
+import { Home, Bookmark, User, Bell, Compass } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
@@ -54,6 +54,7 @@ export default function Navigation() {
   const icons = [
     { name: Home, url: "dashboard", title: "Home" },
     { name: Bookmark, url: "bookmark", title: "Bookmarks" },
+    { name: Compass, url: "discover", title: "Discover" },
     {
       name: Bell,
       url: "notifications",
@@ -65,6 +66,7 @@ export default function Navigation() {
 
   const [isDashboardPage, setIsDashboardPage] = useState(false);
   const [isBookmarkPage, setIsBookmarkPage] = useState(false);
+  const [isDiscoverPage, setIsDiscoverPage] = useState(false);
   const [isNotificationsPage, setIsNotificationsPage] = useState(false);
   const [isAccountPage, setIsAccountPage] = useState(false);
 
@@ -89,6 +91,12 @@ export default function Navigation() {
       setIsNotificationsPage(false);
       setIsDashboardPage(false);
       setIsAccountPage(true);
+    } else if (pathname.includes("discover")) {
+      setIsBookmarkPage(false);
+      setIsNotificationsPage(false);
+      setIsDashboardPage(false);
+      setIsAccountPage(false);
+      setIsDiscoverPage(true);
     }
   }, []);
 
@@ -128,6 +136,10 @@ export default function Navigation() {
                   : "border-white"
               } ${
                 icon.url == "dashboard" && isDashboardPage
+                  ? "border-yellow-700"
+                  : "border-white"
+              } ${
+                icon.url == "discover" && isDiscoverPage
                   ? "border-yellow-700"
                   : "border-white"
               }`}
