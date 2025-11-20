@@ -1,7 +1,6 @@
 "use client";
 
 import "./page.css";
-import logo from "@/assets/logo.png";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -13,87 +12,84 @@ export default function Footer() {
   return (
     <footer
       id="app-footer"
-      className="bg-gray-100 px-6 py-10 pt-10 onest-normal"
+      className="bg-[#f7f7f7] px-6 py-10 pt-10 onest-normal border-t border-gray-200"
     >
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
+        {/* Brand */}
         <div>
-          <Link className="focus:outline-none" href={"/"}>
-            <span className="custom-class text-[30px]">Kavyalok</span>
+          <Link href="/" className="focus:outline-none">
+            <span className="custom-class text-[32px] font-semibold tracking-wide">
+              Kavyalok
+            </span>
           </Link>
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold mb-3">About Us</h3>
-          <p className="text-sm text-gray-400">
-            A creative space for students to share their thoughts, poems,
-            stories, and experiences - express yourself freely, connect with
-            others, and let your voice be heard.
+          <p className="text-sm text-gray-500 mt-3 pr-6">
+            A creative home for writers, poets, and storytellers to express
+            freely and connect with a growing community of readers.
           </p>
         </div>
 
+        {/* About */}
         <div>
-          <h3 className="text-lg font-semibold mb-3">Quick Links</h3>
-          <ul className="space-y-2 text-sm">
-            <li
-              className="hover:cursor-pointer"
-              onClick={() => router.push("/")}
-            >
-              Home
-            </li>
-            <li
-              className="hover:cursor-pointer"
-              onClick={() => router.push("/about")}
-            >
+          <h3 className="text-lg font-semibold mb-3">Platform</h3>
+          <ul className="space-y-2 text-sm text-gray-600">
+            <li className="hover:cursor-pointer hover:text-gray-800 transition"
+              onClick={() => router.push("/about")}>
               About Us
             </li>
-            <li
-              className="hover:cursor-pointer"
-              onClick={() => router.push("/team")}
-            >
+            <li className="hover:cursor-pointer hover:text-gray-800 transition"
+              onClick={() => router.push("/team")}>
               Our Team
             </li>
-            {/* <li
-              className="hover:cursor-pointer"
-              onClick={() => router.push("/releasenotes")}
-            >
-              Release Notes
-            </li> */}
+            <li className="hover:cursor-pointer hover:text-gray-800 transition"
+              onClick={() => router.push("/contact")}>
+              Contact Us
+            </li>
           </ul>
         </div>
 
+        {/* Legal */}
+        <div>
+          <h3 className="text-lg font-semibold mb-3">Legal</h3>
+          <ul className="space-y-2 text-sm text-gray-600">
+            <li
+              className="hover:cursor-pointer hover:text-gray-800 transition"
+              onClick={() => router.push("/privacy-policy")}
+            >
+              Privacy Policy
+            </li>
+            <li
+              className="hover:cursor-pointer hover:text-gray-800 transition"
+              onClick={() => router.push("/terms-and-conditions")}
+            >
+              Terms & Conditions
+            </li>
+            <li
+              className="hover:cursor-pointer hover:text-gray-800 transition"
+              onClick={() => router.push("/refund-policy")}
+            >
+              Refund & Cancellation
+            </li>
+          </ul>
+        </div>
+
+        {/* Connect */}
         <div>
           <h3 className="text-lg font-semibold mb-3">Connect</h3>
-          <ul className="space-y-2 text-sm">
-            {/* <li>
-              <a
-                href="mailto:connect@cleit.in"
-                className="hover:text-gray-700 transition"
-              >
-                connect@cleit.in
-              </a>
-            </li> */}
-            <li
-              className="hover:cursor-pointer"
-              onClick={() => router.push("/contact")}
-            >
-              Contact Us
-            </li>
-            {/* <li>
-              <a
-                href="https://twitter.com/"
-                target="_blank"
-                rel="noreferrer"
-                className="hover:text-gray-700 transition"
-              >
-                Instagram
-              </a>
-            </li>
-             */}
+          <ul className="space-y-2 text-sm text-gray-600">
             <li>
               <a
-                href="https://linkedin.com/company/cleit"
+                href="mailto:support@kavyalok.in"
+                className="hover:text-gray-800 transition"
+              >
+                support@kavyalok.in
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://linkedin.com/company/kavyalokvips"
                 target="_blank"
                 rel="noreferrer"
-                className="hover:text-gray-700 transition"
+                className="hover:text-gray-800 transition"
               >
                 LinkedIn
               </a>
@@ -102,7 +98,8 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="text-center text-sm md:text-base mt-10 border-t border-gray-300 pt-5">
+      {/* Bottom */}
+      <div className="text-center text-sm md:text-base mt-10 pt-5 border-t border-gray-300 text-gray-600">
         © {year} Kavyalok. All rights reserved.
       </div>
     </footer>
