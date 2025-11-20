@@ -36,7 +36,7 @@ export default function PrivacyPolicy() {
             </li>
             <li>
               <b>Payment Information:</b> When registering for competitions,
-              payment is processed securely via Paytm. We do not store card or
+              payment is processed securely via our Payment Gateway Provider. We do not store card or
               bank details.
             </li>
           </ul>
@@ -61,7 +61,7 @@ export default function PrivacyPolicy() {
           </p>
           <ul className="list-disc ml-6 space-y-2">
             <li>
-              <b>Service providers</b> like Paytm for payment processing.
+              <b>Service providers</b> like PayU for payment processing.
             </li>
             <li>
               <b>Legal authorities</b> if required by law.

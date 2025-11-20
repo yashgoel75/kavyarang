@@ -67,7 +67,7 @@ export default function TermsAndConditions() {
             <h2 className="font-semibold text-xl mb-2">4. Payments</h2>
             <p>
               All payments for competition registrations are processed securely
-              through Paytm. Once paid, registration fees are{" "}
+              through our Payment Gateway Provider. Once paid, registration fees are{" "}
               <b>non-refundable</b>, except in cases where the event is
               cancelled by us. For detailed rules, refer to our
               <span className="font-semibold">

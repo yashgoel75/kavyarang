@@ -51,8 +51,7 @@ export default function RefundPolicy() {
                 registration fee.
               </li>
               <li>
-                Refunds will be processed to the same payment method used (via
-                Paytm).
+                Refunds will be processed to the same payment method used.
               </li>
             </ul>
           </section>
@@ -60,7 +59,7 @@ export default function RefundPolicy() {
           <section>
             <h2 className="font-semibold text-xl mb-2">Payment Processing</h2>
             <p>
-              Payments are handled securely through Paytm. Refunds, if
+              Payments are handled securely through out Payment Gateway Provider. Refunds, if
               applicable, may take
               <span className="font-semibold"> 3–7 business days </span>
               to reflect, depending on the bank.
