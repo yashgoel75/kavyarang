@@ -7,12 +7,14 @@ import Footer from "@/components/footer/page";
 import Navigation from "@/components/navigation/page";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
+import { Check } from "lucide-react";
 
 interface Author {
   _id: string;
   name: string;
   username: string;
   profilePicture?: string;
+  isVerified: boolean;
 }
 
 interface Comment {
@@ -121,9 +123,7 @@ export default function PostPage() {
       if (!res.ok) throw new Error(data.error || "Failed to like post");
 
       setIsLiked(!isLiked);
-      setPost((prev) =>
-        prev ? { ...prev, likes: data.likes } : null
-      );
+      setPost((prev) => (prev ? { ...prev, likes: data.likes } : null));
     } catch (err) {
       console.error(err);
     }
@@ -264,6 +264,16 @@ export default function PostPage() {
     );
   }
 
+  const getInitials = (name: string) => {
+    if (!name || name === "Unknown User") return "?";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   function getTextColor(bgColor: string): string {
     const hex = bgColor.replace("#", "");
     const r = parseInt(hex.substring(0, 2), 16);
@@ -290,20 +300,29 @@ export default function PostPage() {
           className="flex-shrink-0 cursor-pointer"
           onClick={() => router.push(`/user/${comment.author.username}`)}
         >
-          {comment.author.profilePicture ? (
-            <div className="relative w-10 h-10">
+          <div className="relative w-10 h-10 rounded-full overflow-hidden">
+            {comment.author.profilePicture ? (
               <Image
                 src={comment.author.profilePicture}
                 alt={comment.author.name}
                 fill
-                className="rounded-full object-cover"
+                className="object-cover"
               />
-            </div>
-          ) : (
-            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-[#bd9864ff] to-[#dbb56aff] text-sm font-semibold text-white">
-              {comment.author.name.charAt(0).toUpperCase()}
-            </div>
-          )}
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#bd9864ff] to-[#dbb56aff] text-sm font-semibold text-white">
+                {getInitials(comment.author.name)}
+              </div>
+            )}
+
+            {comment.author.isVerified && (
+              <div
+                title="Verified"
+                className="absolute bottom-0 right-0 translate-x-1 translate-y-1 bg-green-700 rounded-full p-[3px] flex items-center justify-center"
+              >
+                <Check size={10} color="white" />
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex-1">
@@ -405,20 +424,32 @@ export default function PostPage() {
               className="flex items-center gap-3 mb-4 cursor-pointer"
               onClick={() => router.push(`/user/${post.author.username}`)}
             >
-              {post.author.profilePicture ? (
-                <div className="relative w-12 h-12">
-                  <Image
-                    src={post.author.profilePicture}
-                    alt={post.author.name}
-                    fill
-                    className="rounded-full object-cover"
-                  />
+              <div className="relative w-12 h-12">
+                <div className="relative w-12 h-12 rounded-full overflow-hidden">
+                  {post.author.profilePicture ? (
+                    <Image
+                      src={post.author.profilePicture}
+                      alt={post.author.name}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#bd9864ff] to-[#dbb56aff] text-lg font-semibold text-white">
+                      {getInitials(post.author.name)}
+                    </div>
+                  )}
+
+                  {post.author.isVerified && (
+                    <div
+                      title="Verified"
+                      className="absolute bottom-0 right-0 translate-x-1 translate-y-1 bg-green-700 rounded-full p-[4px] flex items-center justify-center"
+                    >
+                      <Check size={12} color="white" />
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-[#bd9864ff] to-[#dbb56aff] text-lg font-semibold text-white">
-                  {post.author.name.charAt(0).toUpperCase()}
-                </div>
-              )}
+              </div>
+
               <div>
                 <h3 className="font-semibold hover:underline">
                   {post.author.name}

@@ -31,6 +31,16 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const getInitials = (name: string) => {
+    if (!name || name === "Unknown User") return "?";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user?.email) {
@@ -117,13 +127,13 @@ export default function NotificationsPage() {
           <div className="space-y-4">
             {notifications.map((notif) => (
               <div
-                key={notif.id}
+                key={notif.id || `${notif.fromEmail}-${notif.createdAt}`}
                 className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm hover:bg-gray-50 transition cursor-pointer"
                 onClick={() => handleNotificationClick(notif)}
               >
-                <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-white font-medium">
-                  {notif.fromUser?.profilePicture ? (
-                    <div className="relative">
+                <div className="relative w-12 h-12">
+                  <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center text-white font-medium">
+                    {notif.fromUser?.profilePicture ? (
                       <Image
                         src={notif.fromUser.profilePicture}
                         alt={notif.fromUser.name}
@@ -131,29 +141,23 @@ export default function NotificationsPage() {
                         height={48}
                         className="object-cover w-full h-full"
                       />
-                      {notif.fromUser.isVerified && (
-                        <div
-                          title="Verified"
-                          className="absolute bottom-0 -right-1 bg-green-700 rounded-full p-1 flex items-center justify-center"
-                        >
-                          <Check color="white" size={12} />
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="relative">
-                      notif.fromUser?.name.charAt(0).toUpperCase()
-                      {notif.fromUser?.isVerified && (
-                        <div
-                          title="Verified"
-                          className="absolute bottom-0 -right-1 bg-green-700 rounded-full p-1 flex items-center justify-center"
-                        >
-                          <Check color="white" size={12} />
-                        </div>
-                      )}
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-300 text-gray-700 font-semibold text-sm">
+                        {getInitials(notif.fromUser?.name || "")}
+                      </div>
+                    )}
+                  </div>
+
+                  {notif.fromUser?.isVerified && (
+                    <div
+                      title="Verified"
+                      className="absolute bottom-0 right-0 translate-x-1 translate-y-1 bg-green-700 rounded-full p-1 flex items-center justify-center"
+                    >
+                      <Check size={12} color="white" />
                     </div>
                   )}
                 </div>
+
                 <div>
                   {renderNotificationText(notif)}
                   <p className="text-xs text-gray-500">

@@ -9,6 +9,7 @@ import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { Check } from "lucide-react";
 
 export default function Bookmarks() {
   interface User {
@@ -23,6 +24,7 @@ export default function Bookmarks() {
     instagram: string;
     followers: string[];
     following: string[];
+    isVerified: boolean;
   }
 
   interface Post {
@@ -40,6 +42,7 @@ export default function Bookmarks() {
       _id: string;
       name: string;
       profilePicture?: string;
+      isVerified: boolean;
     };
   }
 
@@ -106,6 +109,7 @@ export default function Bookmarks() {
                   _id: post.author,
                   name: authorData.user?.name || "Anonymous",
                   profilePicture: authorData.user?.profilePicture,
+                  isVerified: authorData.user?.isVerified || false,
                 },
               };
             } else {
@@ -119,6 +123,7 @@ export default function Bookmarks() {
                 _id: post.author,
                 name: "Unknown User",
                 profilePicture: undefined,
+                isVerified: false,
               },
             };
           }
@@ -216,19 +221,33 @@ export default function Bookmarks() {
                       className="flex items-center gap-3 cursor-pointer"
                       onClick={() => router.push(`/user/${userData?.username}`)}
                     >
-                      {post.author.profilePicture ? (
-                        <Image
-                          src={post.author.profilePicture}
-                          alt={post.author.name}
-                          width={40}
-                          height={40}
-                          className="rounded-full object-cover w-12 h-12"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-700 font-semibold text-sm">
-                          {getInitials(post.author.name)}
+                      <div className="relative w-12 h-12">
+                        <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                          {post.author.profilePicture ? (
+                            <Image
+                              src={post.author.profilePicture}
+                              alt={post.author.name}
+                              width={48}
+                              height={48}
+                              className="object-cover w-full h-full"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gray-300 text-gray-700 font-semibold text-sm">
+                              {getInitials(post.author.name)}
+                            </div>
+                          )}
                         </div>
-                      )}
+
+                        {post.author.isVerified && (
+                          <div
+                            title="Verified"
+                            className="absolute bottom-0 right-0 translate-x-1 translate-y-1 bg-green-700 p-1 rounded-full flex items-center justify-center"
+                          >
+                            <Check size={12} color="white" />
+                          </div>
+                        )}
+                      </div>
+
                       <span className="font-medium">{post.author.name}</span>
                     </div>
 
