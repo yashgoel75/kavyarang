@@ -676,6 +676,26 @@ export default function Member() {
                 </li>
               </ul>
             </div>
+            <div className="flex items-center mt-4">
+              <input type="checkbox" id="terms" className="mr-2" required />
+              <label htmlFor="terms" className="text-gray-700 text-sm">
+                I agree to the{" "}
+                <Link
+                  href="/terms-and-conditions"
+                  className="text-yellow-600 underline"
+                >
+                  Terms and Conditions
+                </Link>{" "}
+                and{" "}
+                <Link
+                  href="/privacy-policy"
+                  className="text-yellow-600 underline"
+                >
+                  Privacy Policy
+                </Link>
+              </label>
+            </div>
+
             <div className="text-center mt-3">
               <button
                 type="submit"
