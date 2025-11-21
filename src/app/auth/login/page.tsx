@@ -9,10 +9,12 @@ import {
   User,
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
+  sendEmailVerification,
 } from "firebase/auth";
 import Header from "../header/page";
 import Footer from "../footer/page";
 import { auth } from "@/lib/firebase";
+import { Check } from "lucide-react";
 
 interface Post {
   _id: string;
@@ -49,12 +51,24 @@ export default function Login() {
 
   const [posts, setPosts] = useState<Post[]>([]);
 
-  // Auth state observer
+  const [emailNotVerified, setEmailNotVerified] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
+  const [verificationError, setVerificationError] = useState("");
+
+  const [user, setUser] = useState<User | null>(null);
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) return;
+
+      if (user.emailVerified) {
         router.replace("/dashboard");
+        return;
       }
+      setUser(user);
+      setEmailNotVerified(true);
+
+      await auth.signOut();
     });
 
     return () => unsubscribe();
@@ -144,14 +158,38 @@ export default function Login() {
     setSuccess(false);
 
     try {
-      await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      const userCred = await signInWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+
+      if (!userCred.user.emailVerified) {
+        setEmailNotVerified(true);
+        await auth.signOut();
+        setIsSubmitting(false);
+        return;
+      }
+
       setSuccess(true);
       setTimeout(() => router.replace("/dashboard"), 1500);
     } catch (err) {
       setError(true);
       console.error(err);
-    } finally {
-      setIsSubmitting(false);
+    }
+  };
+
+  const sendVerification = async () => {
+    setVerificationError("");
+    setVerificationSent(false);
+
+    try {
+      if (user) {
+        await sendEmailVerification(user);
+        setVerificationSent(true);
+      }
+    } catch (err) {
+      setVerificationError("Failed to send verification email.");
     }
   };
 
@@ -468,19 +506,38 @@ export default function Login() {
                   </button>
                 </div>
               </form>
-              {error && (
-                <div className="flex text-sm md:text-base justify-center items-center mt-2 bg-red-300 text-red-800 rounded px-3 text-center py-1">
+              {emailNotVerified && (
+                <div className="flex mt-2 bg-red-300 text-red-800 rounded px-3 py-2 text-sm md:text-base items-center gap-2">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     height={isMobile ? "20px" : "24px"}
-                    viewBox="0 -960 960 960"
                     width={isMobile ? "20px" : "24px"}
+                    viewBox="0 -960 960 960"
                     fill="#992B15"
+                    className="flex items-start"
                   >
                     <path d="m40-120 440-760 440 760H40Zm138-80h604L480-720 178-200Zm302-40q17 0 28.5-11.5T520-280q0-17-11.5-28.5T480-320q-17 0-28.5 11.5T440-280q0 17 11.5 28.5T480-240Zm-40-120h80v-200h-80v200Zm40-100Z" />
                   </svg>
-                  &nbsp; Invalid Credentials
+
+                  <div className="flex flex-wrap gap-1">
+                    <span>Your email is not verified.</span>
+                    <button
+                      onClick={sendVerification}
+                      className="underline cursor-pointer"
+                    >
+                      Send Verification Email
+                    </button>
+                  </div>
                 </div>
+              )}
+              {verificationSent && (
+                <div className="flex items-center text-green-700 mt-1 text-sm">
+                  Verification email sent!
+                </div>
+              )}
+
+              {verificationError && (
+                <div className="text-red-800 mt-1">{verificationError}</div>
               )}
             </div>
           )}

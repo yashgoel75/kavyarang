@@ -1,7 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+} from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -28,7 +31,6 @@ export default function Member() {
     name: "",
     username: "",
     email: "",
-    otp: "",
     password: "",
     confirmPassword: "",
   });
@@ -41,9 +43,6 @@ export default function Member() {
   const [falsePasswordFormat, setFalsePasswordFormat] = useState(false);
   const [falseConfirmPassword, setFalseConfirmPassword] = useState(false);
 
-  const [invalidOtp, setInvalidOtp] = useState(false);
-  const [validOtp, setValidOtp] = useState(false);
-
   const [usernameAlreadyTaken, setUsernameAlreadyTaken] = useState(false);
   const [usernameAvailable, setUsernameAvailable] = useState(false);
   const [emailAlreadyTaken, setEmailAlreadyTaken] = useState(false);
@@ -51,14 +50,34 @@ export default function Member() {
   const [isNameEmpty, setIsNameEmpty] = useState(false);
   const [isUsernameEmpty, setIsUsernameEmpty] = useState(false);
   const [isEmailEmpty, setIsEmailEmpty] = useState(false);
-  const [isOtpVerificationFailed, setIsOtpVerificationFailed] = useState(false);
   const [isPasswordEmpty, setIsPasswordEmpty] = useState(false);
   const [isConfirmPasswordEmpty, setIsConfirmPasswordEmpty] = useState(false);
 
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
-  const [otpSending, setOtpSending] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
+  const [creatingAccount, setCreatingAccount] = useState(false);
+  const [sendingVerificationEmail, setSendingVerificationEmail] =
+    useState(false);
+  const [creatingUser, setCreatingUser] = useState(false);
+  const [verificationCountdown, setVerificationCountdown] = useState(120); // 2 minutes
+  const [isVerificationMessageVisible, setIsVerificationMessageVisible] =
+    useState(false);
+  const [verificationEmailSent, setVerificationEmailSent] = useState(false);
+
+  useEffect(() => {
+    if (sendingVerificationEmail) {
+      const timer = setInterval(() => {
+        setVerificationCountdown((prev) => {
+          if (prev <= 0) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [sendingVerificationEmail]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -77,8 +96,6 @@ export default function Member() {
     if (name === "email") {
       setIsEmailEmpty(false);
       setEmailAlreadyTaken(false);
-      setOtpSending(false);
-      setOtpSent(false);
     }
     if (name == "password") {
       setIsPasswordEmpty(false);
@@ -104,25 +121,32 @@ export default function Member() {
       setIsConfirmPasswordEmpty(formData.confirmPassword == "");
       return;
     }
-    if (invalidOtp || !validOtp) {
-      setIsOtpVerificationFailed(true);
-      return;
-    }
     setIsSubmitting(true);
     setError("");
     setSuccess(false);
 
     try {
-      await createUserWithEmailAndPassword(
+      setCreatingAccount(true);
+      const userCredentials = await createUserWithEmailAndPassword(
         auth,
         formData.email,
         formData.password
       );
+
+      setCreatingAccount(false);
+      setSendingVerificationEmail(true);
+
+      await sendEmailVerification(userCredentials.user);
+      setSendingVerificationEmail(false);
+      setVerificationEmailSent(true);
+      setCreatingUser(true);
       const res = await axios.post("/api/register/member", formData);
       if (res.status === 200) {
         setSuccess(true);
         setTimeout(() => router.push("/auth/login"), 1500);
       }
+      setCreatingUser(false);
+      setSuccess(true);
     } catch (err) {
       setError("Registration failed. Please try again.");
       console.error(err);
@@ -150,68 +174,6 @@ export default function Member() {
     }
   }
 
-  async function sendEmailOtp() {
-    if (!formData.email) {
-      setIsEmailEmpty(true);
-      return;
-    }
-    if (falseEmailFormat) {
-      return;
-    }
-    try {
-      const res = await fetch(`/api/register/member?email=${formData.email}`);
-      const data = await res.json();
-
-      if (data.emailExists) {
-        setEmailAlreadyTaken(true);
-      } else {
-        setEmailAlreadyTaken(false);
-        setOtpSending(true);
-
-        const otpRes = await fetch("/api/otp/send", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email: formData.email }),
-        });
-
-        const otpData = await otpRes.json();
-        if (!otpRes.ok) {
-          console.error("OTP error:", otpData.error);
-        } else {
-          setOtpSending(false);
-          setOtpSent(true);
-        }
-      }
-    } catch (error) {
-      console.log("Error checking email or sending OTP:", error);
-    }
-  }
-
-  async function verifyOtp() {
-    try {
-      const res = await fetch("/api/otp/verify", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: formData.email, otp: formData.otp }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok && data.verified) {
-        setInvalidOtp(false);
-        setValidOtp(true);
-      } else {
-        setValidOtp(false);
-        setInvalidOtp(true);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }
   useEffect(() => {
     const { username, email, password, confirmPassword } = formData;
 
@@ -231,28 +193,6 @@ export default function Member() {
   }, [formData]);
 
   const [remainingTime, setRemainingTime] = useState(120);
-
-  useEffect(() => {
-    if (!otpSending && !otpSent) {
-      setRemainingTime(120);
-      return;
-    }
-
-    const timer = setInterval(() => {
-      setRemainingTime((prev) => {
-        if (prev > 0) {
-          return prev - 1;
-        } else {
-          clearInterval(timer);
-          setOtpSending(false);
-          setOtpSent(false);
-          return 0;
-        }
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [otpSent]);
 
   return (
     <>
@@ -409,25 +349,8 @@ export default function Member() {
                   placeholder="you@example.com"
                   className="flex-1 px-2 py-2 outline-none w-[70%] lg:w-[80%]"
                 />
-                <button
-                  type="button"
-                  onClick={() => sendEmailOtp()}
-                  disabled={otpSending || otpSent}
-                  className={`bg-gradient-to-br from-[#9a6f0bff] to-[#dbb56aff] w-[30%] lg:w-[20%] outline-none text-white px-1 md:px-2 lg:px-4 md:px-2 lg:px-4 py-2 rounded-md mb-1 hover:from-[#b8870b] hover:to-[#f0c96c] ${
-                    otpSent || otpSending
-                      ? "hover:cursor-not-allowed opacity-50"
-                      : "hover:cursor-pointer"
-                  }`}
-                >
-                  {otpSending ? "Sending" : otpSent ? "Sent" : "Send OTP"}
-                </button>
               </div>
-              {otpSent ? (
-                <div className="text-sm flex text-[#8C1A10] mt-1">
-                  Didn&apos;t receive OTP? Send again&nbsp;in {remainingTime}{" "}
-                  seconds
-                </div>
-              ) : null}
+
               {isEmailEmpty ? (
                 <div className="text-sm flex text-[#8C1A10] mt-1">
                   <svg
@@ -471,76 +394,7 @@ export default function Member() {
                 &nbsp; Please enter a valid email address
               </div>
             ) : null}
-            <div>
-              <label className="block mb-1 text-gray-700 font-medium">
-                Enter OTP
-              </label>
-              <div className="flex items-center border-b-1 border-gray-300">
-                <input
-                  type="text"
-                  name="otp"
-                  placeholder="123456"
-                  value={formData.otp}
-                  onChange={handleChange}
-                  className="flex-1 px-2 py-2 outline-none w-[70%] lg:w-[80%]"
-                />
-                <button
-                  type="button"
-                  onClick={verifyOtp}
-                  disabled={validOtp}
-                  className={`bg-gradient-to-br from-[#9a6f0bff] to-[#dbb56aff] outline-none w-[30%] lg:w-[20%] text-white px-1 md:px-2 lg:px-4 py-2 rounded-md mb-1 hover:from-[#b8870b] hover:to-[#f0c96c] hover:cursor-pointer ${
-                    validOtp
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:cursor-pointer"
-                  }`}
-                >
-                  Verify
-                </button>
-              </div>
-              {isOtpVerificationFailed ? (
-                <div className="text-sm flex text-[#8C1A10] mt-1">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    height="18px"
-                    viewBox="0 -960 960 960"
-                    width="18px"
-                    fill="#8C1A10"
-                  >
-                    <path d="M480-280q17 0 28.5-11.5T520-320q0-17-11.5-28.5T480-360q-17 0-28.5 11.5T440-320q0 17 11.5 28.5T480-280Zm-40-160h80v-240h-80v240Zm40 360q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
-                  </svg>
-                  &nbsp; Please verify your Email ID
-                </div>
-              ) : null}
-            </div>
 
-            {invalidOtp ? (
-              <div className="flex text-sm md:text-base justify-center md:items-center bg-red-300 text-red-800 rounded px-3 text-center py-1">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  height={isMobile ? "20px" : "24px"}
-                  viewBox="0 -960 960 960"
-                  width={isMobile ? "20px" : "24px"}
-                  fill="#992B15"
-                >
-                  <path d="m40-120 440-760 440 760H40Zm138-80h604L480-720 178-200Zm302-40q17 0 28.5-11.5T520-280q0-17-11.5-28.5T480-320q-17 0-28.5 11.5T440-280q0 17 11.5 28.5T480-240Zm-40-120h80v-200h-80v200Zm40-100Z" />
-                </svg>
-                &nbsp; The entered OTP is invalid. Kindly verify and re-enter.
-              </div>
-            ) : null}
-            {validOtp ? (
-              <div className="flex text-sm md:text-base justify-center items-center bg-green-500 text-[#264d0fff] rounded px-3 text-center py-1">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="24px"
-                  viewBox="0 -960 960 960"
-                  width="24px"
-                  fill="#264d0fff"
-                >
-                  <path d="m344-60-76-128-144-32 14-148-98-112 98-112-14-148 144-32 76-128 136 58 136-58 76 128 144 32-14 148 98 112-98 112 14 148-144 32-76 128-136-58-136 58Zm34-102 102-44 104 44 56-96 110-26-10-112 74-84-74-86 10-112-110-24-58-96-102 44-104-44-56 96-110 24 10 112-74 86 74 84-10 114 110 24 58 96Zm102-318Zm-42 142 226-226-56-58-170 170-86-84-56 56 142 142Z" />
-                </svg>
-                &nbsp; OTP verified successfully
-              </div>
-            ) : null}
             <div className="flex-1 space-y-1 md:flex gap-4">
               <div className="flex-1">
                 <div>
@@ -706,7 +560,11 @@ export default function Member() {
                     : "hover:cursor-pointer"
                 }`}
               >
-                {isSubmitting
+                {creatingAccount
+                  ? "Creating Account..."
+                  : sendingVerificationEmail
+                  ? "Sending Verification Email..."
+                  : isSubmitting
                   ? "Submitting..."
                   : success
                   ? "Redirecting... Please Wait"
@@ -714,6 +572,26 @@ export default function Member() {
               </button>
             </div>
           </form>
+          {verificationEmailSent && !success && (
+            <div className="mt-6 px-4 py-2 bg-green-50 text-green-800 border border-green-200 rounded-xl shadow-md">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold">Verification Email Sent!</span>
+              </div>
+              <p className="mt-2 text-sm">
+                We have sent a verification email to{" "}
+                <strong>{formData.email}</strong>. Please check your inbox (and
+                spam folder) and verify your email address.
+              </p>
+              <p className="mt-2 text-sm">
+                You must verify your email within{" "}
+                <strong>
+                  {Math.floor(verificationCountdown / 60)}:
+                  {(verificationCountdown % 60).toString().padStart(2, "0")}
+                </strong>{" "}
+                minutes, or else your account will be deleted.
+              </p>
+            </div>
+          )}
         </div>
         <div className="text-center mb-8">
           Already have an account?&nbsp;
