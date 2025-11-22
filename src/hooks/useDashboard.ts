@@ -100,7 +100,7 @@ export function useDashboard() {
 
             setLoadingPosts(true);
             try {
-                const res = await fetch(`/api/getPosts?page=${page}&limit=9`);
+                const res = await fetch(`/api/getallposts?page=${page}&limit=9`);
                 const data = await res.json();
 
                 const filtered = data.posts.filter((p: Post) => p.author.email !== userData.email);
