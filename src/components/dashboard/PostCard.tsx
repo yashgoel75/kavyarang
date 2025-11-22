@@ -1,9 +1,10 @@
 "use client";
 import { useState } from "react";
-import { Check, Send } from "lucide-react";
+import { Check, MessageCircle, Send } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { getCommentColor } from "@/lib/utils";
 
 interface Post {
   _id: string;
@@ -12,6 +13,7 @@ interface Post {
   picture?: string;
   author: User;
   likes: number;
+  comments: [string];
   color: string;
 }
 
@@ -39,6 +41,7 @@ interface PostCardProps {
   handleBookmark: (id: string) => void;
   getTextColor: (color: string) => string;
   getIconColor: (color: string, isLiked: boolean) => string;
+  getCommentColor: (color: string) => string;
   getInitials: (name: string) => string;
   router: AppRouterInstance;
 }
@@ -174,10 +177,6 @@ export default function PostCard({
                 post.color || "#ffffff",
                 likedPosts[post._id]
               ),
-              textShadow:
-                getTextColor(post.color || "#ffffff") === "#ffffff"
-                  ? "0 0 4px rgba(0,0,0,0.4)"
-                  : "0 0 4px rgba(255,255,255,0.4)",
             }}
           >
             <svg
@@ -201,7 +200,18 @@ export default function PostCard({
                 clipRule="evenodd"
               />
             </svg>
-            <span className="text-sm font-semibold">{post.likes}</span>
+            <span className="text-sm font-semibold">{post.likes}&nbsp;</span>
+            <MessageCircle
+              color={getCommentColor(post.color || "#ffffff")}
+              size={18}
+              strokeWidth="1.5"
+            ></MessageCircle>
+            <span
+              style={{ color: getCommentColor(post.color || "#ffffff") }}
+              className="text-sm font-semibold"
+            >
+              {post.comments.length}
+            </span>
           </button>
 
           <button
@@ -216,7 +226,11 @@ export default function PostCard({
               className="h-4 w-4"
               viewBox="0 0 20 20"
               fill={bookmarkedPosts[post._id] ? "currentColor" : "none"}
-              stroke="currentColor"
+              stroke={
+                bookmarkedPosts[post._id]
+                  ? "currentColor"
+                  : getCommentColor(post.color || "#ffffff")
+              }
               strokeWidth="1.5"
             >
               <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
@@ -224,13 +238,7 @@ export default function PostCard({
           </button>
         </div>
 
-        <div className="flex items-center gap-4 relative">
-          <Link href={`/post/${post._id}`}>
-            <button className="cursor-pointer text-sm font-medium">
-              Tap to Comment
-            </button>
-          </Link>
-
+        <div className="flex items-centerrelative">
           <button
             onClick={() => setShowShareOptions(!showShareOptions)}
             className="hover:scale-110 transition-transform cursor-pointer"

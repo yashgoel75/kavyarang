@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import PostCard from "./PostCard"; // Assuming this exists
 import { User, Post } from "@/hooks/useDashboard";
 import { useRouter } from "next/navigation";
-import { getTextColor, getIconColor } from "@/lib/utils";
+import { getTextColor, getIconColor, getCommentColor } from "@/lib/utils";
 import { User as FirebaseUser } from "firebase/auth";
 
 interface FeedProps {
@@ -97,6 +97,7 @@ export default function PostFeed({
               handleBookmark={onBookmark}
               getTextColor={getTextColor}
               getIconColor={getIconColor}
+              getCommentColor={getCommentColor}
               getInitials={getInitials}
               router={router}
             />

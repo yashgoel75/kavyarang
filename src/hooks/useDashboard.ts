@@ -7,6 +7,7 @@ export interface Post {
     _id: string;
     title: string;
     content: string;
+    comments: [string];
     picture?: string;
     author: User;
     likes: number;
