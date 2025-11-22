@@ -363,7 +363,7 @@ export default function Account() {
   return (
     <>
       <Header />
-      <main className="max-w-5xl mx-auto px-4 py-10 min-h-[85vh] inter-normal">
+      <main className="max-w-5xl mx-auto px-4 py-10 min-h-[85vh]">
         <div className="mb-10">
           <h2 className="text-3xl font-bold text-gray-800 text-center">
             Account
@@ -371,210 +371,259 @@ export default function Account() {
         </div>
 
         <div className="flex-1 space-y-4 md:flex justify-around gap-1 bg-white shadow-sm rounded-xl p-2 md:p-8 mb-8 border border-gray-100">
-          <div className="lg:w-lg  p-5">
-            <div className="flex flex-col items-center space-y-6">
-              <div className="relative">
-                <div className="relative w-32 h-32">
-                  {userData.profilePicture ? (
-                    <Image
-                      src={userData.profilePicture}
-                      alt={`${userData.name}'s profile`}
-                      fill
-                      className="rounded-full object-cover border-2 border-gray-200"
-                    />
-                  ) : (
-                    <div className="w-32 h-32 rounded-full flex items-center justify-center bg-gradient-to-br from-[#bd9864ff] to-[#dbb56aff] text-3xl font-semibold text-white">
-                      {userData.name.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                  {isUploadingImage && (
-                    <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center">
-                      <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    </div>
-                  )}
-                </div>
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploadingImage}
-                  className="absolute bottom-0 right-0 bg-[#bd9864ff] text-white p-2.5 rounded-full shadow-md hover:bg-[#9a6f0bff] hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                  title="Change profile picture"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                  </svg>
-                </button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleProfilePictureChange}
-                  className="hidden"
-                />
-              </div>
-
-              {!isEdit ? (
-                <div className="text-center space-y-2 w-full">
-                  <h3 className="text-2xl font-semibold text-gray-800">
-                    {userData.name}
-                  </h3>
-                  <p className="text-gray-500">@{userData.username}</p>
-                  <p className="text-gray-600">{userData.email}</p>
-                  {userData.bio && (
-                    <div className="mt-4 pt-4 border-t border-gray-100">
-                      <p className="text-gray-700 italic">
-                        &apos;{userData.bio}&apos;
-                      </p>
-                    </div>
-                  )}
-                  <button
-                    onClick={() => setIsEdit(true)}
-                    className="mt-6 bg-[#bd9864ff] hover:bg-[#9a6f0bff] text-white px-6 py-2 rounded-md font-medium transition-colors duration-200 cursor-pointer"
-                  >
-                    Edit Profile
-                  </button>
-                </div>
-              ) : (
-                <div className="w-full max-w-md space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Name
-                    </label>
-                    <input
-                      type="text"
-                      value={formData?.name || ""}
-                      onChange={(e) =>
-                        setFormData((prev) =>
-                          prev ? { ...prev, name: e.target.value } : null
-                        )
-                      }
-                      className="w-full border border-gray-300 px-4 py-2 rounded-md focus:ring-2 focus:ring-[#bd9864ff] focus:border-[#bd9864ff] focus:outline-none transition-all"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Username
-                    </label>
-                    <input
-                      type="text"
-                      value={formData?.username || ""}
-                      onChange={(e) => {
-                        const newUsername = e.target.value;
-                        setFormData((prev) =>
-                          prev ? { ...prev, username: newUsername } : null
-                        );
-                      }}
-                      className={`w-full border ${
-                        formData?.username &&
-                        formData.username !== userData?.username
-                          ? usernameAlreadyTaken
-                            ? "border-red-400 focus:ring-red-400 focus:border-red-400"
-                            : usernameAvailable
-                            ? "border-green-400 focus:ring-green-400 focus:border-green-400"
-                            : "border-gray-300 focus:ring-[#bd9864ff] focus:border-[#bd9864ff]"
-                          : "border-gray-300 focus:ring-[#bd9864ff] focus:border-[#bd9864ff]"
-                      } px-4 py-2 rounded-md focus:ring-2 focus:outline-none transition-all`}
-                    />
-                    {isCheckingUsername &&
-                      formData?.username !== userData?.username && (
-                        <p className="text-xs text-gray-500 mt-1">
-                          Checking availability...
-                        </p>
-                      )}
-                    {!isCheckingUsername &&
-                      formData?.username &&
-                      formData.username !== userData?.username && (
-                        <>
-                          {usernameAlreadyTaken && (
-                            <p className="text-xs text-red-600 mt-1">
-                              Username is already taken
-                            </p>
-                          )}
-                          {usernameAvailable && !usernameAlreadyTaken && (
-                            <p className="text-xs text-green-600 mt-1">
-                              Username is available
-                            </p>
-                          )}
-                        </>
-                      )}
-                  </div>
-
-                  <div className="w-full space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Instagram
-                      </label>
-                      <input
-                        type="text"
-                        value={formData?.instagram || ""}
-                        onChange={(e) =>
-                          setFormData((prev) =>
-                            prev ? { ...prev, instagram: e.target.value } : null
-                          )
-                        }
-                        className="w-full border border-gray-300 px-4 py-2 rounded-md focus:ring-2 focus:ring-[#bd9864ff] focus:border-[#bd9864ff] focus:outline-none transition-all"
+          <div className="lg:w-lg p-5">
+            <div className="flex gap-5">
+              <div className="flex flex-col w-fit items-center">
+                <div className="relative">
+                  <div className="w-32 h-32">
+                    {userData.profilePicture ? (
+                      <Image
+                        src={userData.profilePicture}
+                        alt={`${userData.name}'s profile`}
+                        fill
+                        className="rounded-full object-cover border-2 border-gray-200"
                       />
+                    ) : (
+                      <div className="w-32 h-32 rounded-full flex items-center justify-center bg-gradient-to-br from-[#bd9864ff] to-[#dbb56aff] text-3xl font-semibold text-white">
+                        {userData.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    {isUploadingImage && (
+                      <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center">
+                        <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploadingImage}
+                    className="absolute bottom-0 right-0 bg-[#bd9864ff] text-white p-2.5 rounded-full shadow-md hover:bg-[#9a6f0bff] hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    title="Change profile picture"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                    </svg>
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleProfilePictureChange}
+                    className="hidden"
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col items-start space-y-6 w-full relative">
+                {!isEdit ? (
+                  <div className="w-full relative">
+                    <div className="absolute right-0 justify-end mb-3">
+                      <button
+                        onClick={() => setIsEdit(true)}
+                        className="bg-[#bd9864ff] hover:bg-[#9a6f0bff] text-white px-4 py-1 rounded-md font-medium transition-colors duration-200 cursor-pointer"
+                      >
+                        Edit
+                      </button>
+                    </div>
+
+                    <div className="space-y-2 w-full">
+                      <h3 className="text-2xl font-semibold text-gray-800">
+                        {userData.name}
+                      </h3>
+                      <p className="text-gray-500">@{userData.username}</p>
+                      <p className="text-gray-600">{userData.email}</p>
+
+                      {userData.bio && (
+                        <div className="mt-4 pt-4 border-t border-gray-100">
+                          <p className="text-gray-700 italic">
+                            &apos;{userData.bio}&apos;
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="flex gap-5 mt-5">
+                        {userData.instagram ? (
+                          <a
+                            href={`https://instagram.com/${userData.instagram}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-3 rounded-xl text-white shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1"
+                          >
+                            <Image
+                              src={instagram}
+                              width={30}
+                              height={30}
+                              alt="Instagram"
+                              className="shadow-md"
+                            />
+                          </a>
+                        ) : null}
+
+                        {userData.snapchat ? (
+                          <a
+                            href={`https://snapchat.com/add/${userData.snapchat}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1"
+                          >
+                            <Image
+                              src={snapchat}
+                              width={30}
+                              height={30}
+                              alt="Snapchat"
+                              className="rounded-full shadow-md"
+                            />
+                          </a>
+                        ) : null}
+                      </div>
                     </div>
                   </div>
-
+                ) : (
                   <div className="w-full max-w-md space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Snapchat
+                        Name
                       </label>
                       <input
                         type="text"
-                        value={formData?.snapchat || ""}
+                        value={formData?.name || ""}
                         onChange={(e) =>
                           setFormData((prev) =>
-                            prev ? { ...prev, snapchat: e.target.value } : null
+                            prev ? { ...prev, name: e.target.value } : null
                           )
                         }
                         className="w-full border border-gray-300 px-4 py-2 rounded-md focus:ring-2 focus:ring-[#bd9864ff] focus:border-[#bd9864ff] focus:outline-none transition-all"
                       />
                     </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Username
+                      </label>
+                      <input
+                        type="text"
+                        value={formData?.username || ""}
+                        onChange={(e) => {
+                          const newUsername = e.target.value;
+                          setFormData((prev) =>
+                            prev ? { ...prev, username: newUsername } : null
+                          );
+                        }}
+                        className={`w-full border ${
+                          formData?.username &&
+                          formData.username !== userData?.username
+                            ? usernameAlreadyTaken
+                              ? "border-red-400 focus:ring-red-400 focus:border-red-400"
+                              : usernameAvailable
+                              ? "border-green-400 focus:ring-green-400 focus:border-green-400"
+                              : "border-gray-300 focus:ring-[#bd9864ff] focus:border-[#bd9864ff]"
+                            : "border-gray-300 focus:ring-[#bd9864ff] focus:border-[#bd9864ff]"
+                        } px-4 py-2 rounded-md focus:ring-2 focus:outline-none transition-all`}
+                      />
+                      {isCheckingUsername &&
+                        formData?.username !== userData?.username && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            Checking availability...
+                          </p>
+                        )}
+                      {!isCheckingUsername &&
+                        formData?.username &&
+                        formData.username !== userData?.username && (
+                          <>
+                            {usernameAlreadyTaken && (
+                              <p className="text-xs text-red-600 mt-1">
+                                Username is already taken
+                              </p>
+                            )}
+                            {usernameAvailable && !usernameAlreadyTaken && (
+                              <p className="text-xs text-green-600 mt-1">
+                                Username is available
+                              </p>
+                            )}
+                          </>
+                        )}
+                    </div>
+
+                    <div className="w-full space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Instagram
+                        </label>
+                        <input
+                          type="text"
+                          value={formData?.instagram || ""}
+                          onChange={(e) =>
+                            setFormData((prev) =>
+                              prev
+                                ? { ...prev, instagram: e.target.value }
+                                : null
+                            )
+                          }
+                          className="w-full border border-gray-300 px-4 py-2 rounded-md focus:ring-2 focus:ring-[#bd9864ff] focus:border-[#bd9864ff] focus:outline-none transition-all"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="w-full max-w-md space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Snapchat
+                        </label>
+                        <input
+                          type="text"
+                          value={formData?.snapchat || ""}
+                          onChange={(e) =>
+                            setFormData((prev) =>
+                              prev
+                                ? { ...prev, snapchat: e.target.value }
+                                : null
+                            )
+                          }
+                          className="w-full border border-gray-300 px-4 py-2 rounded-md focus:ring-2 focus:ring-[#bd9864ff] focus:border-[#bd9864ff] focus:outline-none transition-all"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Bio
+                      </label>
+                      <textarea
+                        value={formData?.bio || ""}
+                        onChange={(e) =>
+                          setFormData((prev) =>
+                            prev ? { ...prev, bio: e.target.value } : null
+                          )
+                        }
+                        rows={3}
+                        className="w-full border border-gray-300 px-4 py-2 rounded-md focus:ring-2 focus:ring-[#bd9864ff] focus:border-[#bd9864ff] focus:outline-none transition-all resize-none"
+                      />
+                    </div>
+
+                    <button
+                      onClick={handleUpdate}
+                      disabled={isUpdating}
+                      className="w-full bg-[#bd9864ff] text-white font-medium py-2 rounded-md hover:bg-[#9a6f0bff] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      {isUpdating ? "Saving..." : "Save Changes"}
+                    </button>
+
+                    <button
+                      onClick={() => setIsEdit(false)}
+                      className="w-full bg-gray-100 text-gray-700 font-medium py-2 rounded-md hover:bg-gray-200 transition-colors duration-200 cursor-pointer"
+                    >
+                      Cancel
+                    </button>
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Bio
-                    </label>
-                    <textarea
-                      value={formData?.bio || ""}
-                      onChange={(e) =>
-                        setFormData((prev) =>
-                          prev ? { ...prev, bio: e.target.value } : null
-                        )
-                      }
-                      rows={3}
-                      className="w-full border border-gray-300 px-4 py-2 rounded-md focus:ring-2 focus:ring-[#bd9864ff] focus:border-[#bd9864ff] focus:outline-none transition-all resize-none"
-                    />
-                  </div>
-
-                  <button
-                    onClick={handleUpdate}
-                    disabled={isUpdating}
-                    className="w-full bg-[#bd9864ff] text-white font-medium py-2 rounded-md hover:bg-[#9a6f0bff] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                  >
-                    {isUpdating ? "Saving..." : "Save Changes"}
-                  </button>
-
-                  <button
-                    onClick={() => setIsEdit(false)}
-                    className="w-full bg-gray-100 text-gray-700 font-medium py-2 rounded-md hover:bg-gray-200 transition-colors duration-200 cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
-          <div className="border-1 min-w-[300px] rounded-xl shadow-lg border-gray-100 p-5 inter-normal">
+          <div className="border-1 min-w-[300px] rounded-xl shadow-lg border-gray-100 p-5">
             <div className="flex flex-col space-y-4">
               <div className="flex gap-4 justify-around bg-gray-50 md:flex-col md:space-y-4 md:mt-3 px-3 py-5 rounded-lg shadow-xl">
                 <Link href={"/account/friends"}>
@@ -601,52 +650,6 @@ export default function Account() {
                     </p>
                   </div>
                 </Link>
-              </div>
-
-              <div className="flex flex-col gap-5 mt-5">
-                {userData.instagram ? (
-                  <div>
-                    <a
-                      href={`https://instagram.com/${userData.instagram}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 px-5 py-2 rounded-xl bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 text-white shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1"
-                    >
-                      <Image
-                        src={instagram}
-                        width={25}
-                        height={25}
-                        alt="Instagram"
-                        className="shadow-md"
-                      />
-                      <span className="font-medium truncate">
-                        {userData.instagram}
-                      </span>
-                    </a>
-                  </div>
-                ) : null}
-
-                {userData.snapchat ? (
-                  <div>
-                    <a
-                      href={`https://snapchat.com/add/${userData.snapchat}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 px-5 py-2 rounded-xl bg-[#f5ec00] text-black shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1"
-                    >
-                      <Image
-                        src={snapchat}
-                        width={25}
-                        height={25}
-                        alt="Snapchat"
-                        className="rounded-full shadow-md"
-                      />
-                      <span className="font-medium truncate">
-                        {userData.snapchat}
-                      </span>
-                    </a>
-                  </div>
-                ) : null}
               </div>
             </div>
           </div>
