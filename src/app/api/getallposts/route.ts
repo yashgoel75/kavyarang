@@ -15,9 +15,9 @@ export async function GET(req: Request) {
     const cacheKey = `posts:page:${page}:limit:${limit}`;
 
     const cached = await redis.get(cacheKey);
-    // if (cached) {
-    //   return NextResponse.json(cached);
-    // }
+    if (cached) {
+      return NextResponse.json(cached);
+    }
 
     const posts = await Post.find({})
         .sort({ createdAt: -1 })
