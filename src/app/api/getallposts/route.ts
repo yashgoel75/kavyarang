@@ -26,7 +26,7 @@ export async function GET(req: Request) {
   .populate({
     path: "author",
     select:
-      "-posts -bio -bookmarks -instagram -snapchat -followers -following -isVerified -likes -notifications -createdAt -updatedAt -__v",
+      "-posts -bio -bookmarks -instagram -snapchat -followers -following -likes -notifications -createdAt -updatedAt -__v",
   })
   .select({
     title: 1,
