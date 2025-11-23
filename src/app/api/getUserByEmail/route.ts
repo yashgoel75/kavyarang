@@ -13,12 +13,30 @@ export async function GET(req: Request) {
   }
 
   try {
-    const user = await User.findOne({ email }).lean();
-    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const user = await User.findOne(
+      { email },
+      {
+        profilePicture: 1,
+        isVerified: 1,
+        name: 1,
+        username: 1,
+        email: 1
+      }
+    ).lean();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json({ user });
   } catch (error) {
     console.error("Error fetching user:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

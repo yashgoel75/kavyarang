@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import Header from "@/components/header/page";
@@ -67,13 +67,14 @@ export default function PostPage() {
     if (postId) {
       fetchPost(postId);
     }
-  }, [postId, firebaseUser]);
+  }, [postId]);
 
   const fetchPost = async (id: string) => {
     try {
       const res = await fetch(`/api/post?postId=${encodeURIComponent(id)}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load post");
+
       setPost(data.post);
 
       if (firebaseUser?.email) {
@@ -110,15 +111,12 @@ export default function PostPage() {
     try {
       const res = await fetch(`/api/post/like`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           postId: post._id,
           email: firebaseUser.email,
         }),
       });
-
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to like post");
 
@@ -135,15 +133,12 @@ export default function PostPage() {
     try {
       const res = await fetch(`/api/post/bookmark`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           postId: post._id,
           email: firebaseUser.email,
         }),
       });
-
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to bookmark post");
 
@@ -160,21 +155,25 @@ export default function PostPage() {
     try {
       const res = await fetch(`/api/post/comment`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           postId: post._id,
           email: firebaseUser.email,
           content: commentText,
         }),
       });
-
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to post comment");
 
+      setPost((prev) =>
+        prev
+          ? {
+              ...prev,
+              comments: [...prev.comments, data.comment],
+            }
+          : prev
+      );
       setCommentText("");
-      fetchPost(postId);
     } catch (err) {
       console.error(err);
       alert("Failed to post comment.");
@@ -190,9 +189,7 @@ export default function PostPage() {
     try {
       const res = await fetch(`/api/post/comment`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           postId: post._id,
           email: firebaseUser.email,
@@ -200,13 +197,32 @@ export default function PostPage() {
           parentComment: commentId,
         }),
       });
-
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to post reply");
 
+      setPost((prev) => {
+        if (!prev) return prev;
+        const updatedComments = [...prev.comments];
+        const insertReply = (comments: Comment[]): boolean => {
+          for (const c of comments) {
+            if (c._id === commentId) {
+              c.replies = c.replies
+                ? [...c.replies, data.comment]
+                : [data.comment];
+              return true;
+            }
+            if (c.replies && c.replies.length > 0) {
+              if (insertReply(c.replies)) return true;
+            }
+          }
+          return false;
+        };
+        insertReply(updatedComments);
+        return { ...prev, comments: updatedComments };
+      });
+
       setReplyText("");
       setReplyTo(null);
-      fetchPost(postId);
     } catch (err) {
       console.error(err);
       alert("Failed to post reply.");
@@ -236,6 +252,11 @@ export default function PostPage() {
 
     return rootComments;
   };
+
+  const organizedComments = useMemo(() => {
+    if (!post?.comments) return [];
+    return organizeComments(post.comments);
+  }, [post?.comments]);
 
   if (loading) {
     return (
@@ -286,7 +307,6 @@ export default function PostPage() {
   const textColor = getTextColor(post.color || "#ffffff");
   const wordCount = post.content ? post.content.split(/\s+/).length : 0;
   const readingTime = Math.ceil(wordCount / 200) || 1;
-  const organizedComments = organizeComments(post.comments || []);
 
   const renderComment = (comment: Comment, level: number = 0) => (
     <div

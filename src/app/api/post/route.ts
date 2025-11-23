@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { register } from "@/instrumentation";
-import { Post, User } from "../../../../db/schema";
+import { Post, Comment } from "../../../../db/schema";
 
 export async function GET(req: NextRequest) {
   try {
@@ -10,28 +10,34 @@ export async function GET(req: NextRequest) {
     const postId = searchParams.get("postId");
 
     if (!postId) {
-      return NextResponse.json(
-        { error: "Post ID is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Post ID is required" }, { status: 400 });
     }
 
     const post = await Post.findById(postId)
-      .populate("author", "name username email profilePicture")
-      .populate({
-        path: "comments",
-        populate: {
-          path: "author",
-          select: "name username email profilePicture",
-        },
-      })
+      .select("title content picture tags likes createdAt author")
+      .populate("author", "name username profilePicture isVerified")
       .lean();
 
     if (!post) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ post }, { status: 200 });
+    const comments = await Comment.find({ post: postId })
+      .select("content likes createdAt parentComment")
+      .populate("author", "name username profilePicture isVerified")
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .lean();
+
+    return NextResponse.json(
+      {
+        post,
+        comments,
+        commentCount: await Comment.countDocuments({ post: postId })
+      },
+      { status: 200 }
+    );
+
   } catch (error) {
     console.error("Error fetching post:", error);
     return NextResponse.json(
