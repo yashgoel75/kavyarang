@@ -62,11 +62,14 @@ export default function PostCard({
   const [showShareOptions, setShowShareOptions] = useState(false);
   const readingTime = Math.ceil(post.content.split(" ").length / 200);
 
+  const [copied, setCopied] = useState(false);
+
   const getBackgroundColor = (textColor: string) =>
     textColor === "#000000" ? "#ffffff" : "#000000";
 
   const handleShare = (platform: string) => {
     const postUrl = `${window.location.origin}/post/${post._id}`;
+
     if (platform === "whatsapp") {
       window.open(
         `https://wa.me/?text=${encodeURIComponent(postUrl)}`,
@@ -74,8 +77,11 @@ export default function PostCard({
       );
     } else if (platform === "copy") {
       navigator.clipboard.writeText(postUrl);
-      alert("Link copied to clipboard!");
+
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
+
     setShowShareOptions(false);
   };
 
@@ -86,7 +92,10 @@ export default function PostCard({
         backgroundColor: post.color || "#ffffff",
         color: getTextColor(post.color || "#ffffff"),
       }}
-      className="bg-white p-5 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group flex flex-col"
+      onClick={() => {
+        showShareOptions ? setShowShareOptions(false) : null;
+      }}
+      className="bg-white relative p-5 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group flex flex-col"
     >
       <div className="flex items-center justify-between mb-3">
         <div
@@ -248,26 +257,32 @@ export default function PostCard({
 
           {showShareOptions && (
             <div
+              className="absolute bottom-10 right-0 w-36 rounded-xl shadow-xl p-1 flex flex-col gap-2 text-sm animate-fadeIn z-50"
               style={{
                 backgroundColor: getTextColor(post.color || "#ffffff"),
                 color: getBackgroundColor(
                   getTextColor(post.color || "#ffffff")
                 ),
               }}
-              className="absolute bottom-8 right-0 border rounded-lg shadow-lg p-2 z-50 flex flex-col gap-2 text-sm"
             >
               <button
-                className="cursor-pointer"
+                className="py-1 px-2 rounded-md hover:bg-black/10 transition"
                 onClick={() => handleShare("whatsapp")}
               >
                 WhatsApp
               </button>
+
               <button
-                className="cursor-pointer"
+                className="py-1 px-2 rounded-md hover:bg-black/10 transition"
                 onClick={() => handleShare("copy")}
               >
                 Copy Link
               </button>
+            </div>
+          )}
+          {copied && (
+            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs py-1 px-3 rounded-full shadow-lg animate-fadeIn z-50">
+              Copied!
             </div>
           )}
         </div>
