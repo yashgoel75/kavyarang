@@ -59,7 +59,7 @@ export default function RefundPolicy() {
           <section>
             <h2 className="font-semibold text-xl mb-2">Payment Processing</h2>
             <p>
-              Payments are handled securely through out Payment Gateway Provider. Refunds, if
+              Payments are handled securely through our Payment Gateway Provider. Refunds, if
               applicable, may take
               <span className="font-semibold"> 3–7 business days </span>
               to reflect, depending on the bank.
