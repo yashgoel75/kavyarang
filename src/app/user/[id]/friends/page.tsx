@@ -24,6 +24,8 @@ interface UserData {
   profilePicture?: string;
   followers: string[];
   following: string[];
+  email: string;
+  isVerified: boolean;
 }
 
 export default function UserFriendsPage() {
@@ -59,7 +61,7 @@ export default function UserFriendsPage() {
   const fetchCurrentUser = async (email: string) => {
     try {
       const res = await fetch(
-        `/api/user/posts?email=${encodeURIComponent(email)}`
+        `/api/getuserfriends?email=${encodeURIComponent(email)}`
       );
       const data = await res.json();
       setCurrentUserData({
@@ -68,6 +70,8 @@ export default function UserFriendsPage() {
         profilePicture: data.user.profilePicture,
         followers: data.user.followers || [],
         following: data.user.following || [],
+        email: data.user.email || "",
+        isVerified: data.user.isVerified || false,
       });
       fetchProfileUser();
     } catch (err) {
@@ -81,16 +85,20 @@ export default function UserFriendsPage() {
         `/api/getUser?username=${encodeURIComponent(userId)}`
       );
       const data = await res.json();
+
       const user: UserData = {
         name: data.user.name,
         username: data.user.username,
         profilePicture: data.user.profilePicture,
         followers: data.user.followers || [],
         following: data.user.following || [],
+        email: data.user.email || "",
+        isVerified: data.user.isVerified || false,
       };
+
       setProfileUserData(user);
 
-      await Promise.all([
+      const [followersList, followingList] = await Promise.all([
         fetchFriends(user.followers, setFollowers),
         fetchFriends(user.following, setFollowing),
       ]);
@@ -98,6 +106,7 @@ export default function UserFriendsPage() {
       const mutualEmails = user.followers.filter((email) =>
         currentUserData?.following.includes(email)
       );
+
       await fetchFriends(mutualEmails, setMutualFriends);
     } catch (err) {
       console.error(err);
@@ -110,31 +119,38 @@ export default function UserFriendsPage() {
     emails: string[],
     setState: (friends: Friend[]) => void
   ) => {
-    const friends: Friend[] = [];
+    if (emails.length === 0) {
+      setState([]);
+      return;
+    }
 
-    await Promise.all(
-      emails.map(async (email) => {
-        try {
-          const res = await fetch(
-            `/api/getUserByEmail?email=${encodeURIComponent(email)}`
-          );
-          const data = await res.json();
-          if (res.ok && data.user) {
-            friends.push({
-              name: data.user.name,
-              username: data.user.username,
-              profilePicture: data.user.profilePicture,
-              email: email,
-              isVerified: data.user.isVerified || false,
-            });
-          }
-        } catch (err) {
-          console.error("Error fetching friend:", err);
-        }
-      })
-    );
+    try {
+      const res = await fetch("/api/getbatchfriends", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ emails }),
+      });
 
-    setState(friends);
+      const data = await res.json();
+
+      if (res.ok) {
+        const formatted: Friend[] = data.users.map((user: UserData) => ({
+          name: user.name,
+          username: user.username,
+          profilePicture: user.profilePicture,
+          email: user.email,
+          isVerified: user.isVerified ?? false,
+        }));
+
+        setState(formatted);
+      } else {
+        console.error("Failed batch fetch:", data.error);
+        setState([]);
+      }
+    } catch (err) {
+      console.error("Batch fetch error:", err);
+      setState([]);
+    }
   };
 
   if (loading) return <p className="text-center mt-20">Loading friends...</p>;

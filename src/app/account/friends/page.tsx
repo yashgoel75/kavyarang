@@ -51,9 +51,10 @@ export default function FriendsPage() {
   const fetchUserData = async (email: string) => {
     try {
       const res = await fetch(
-        `/api/user/posts?email=${encodeURIComponent(email)}`
+        `/api/getuserfriends?email=${encodeURIComponent(email)}`
       );
       const data = await res.json();
+
       if (!res.ok) throw new Error(data.error || "Failed to load user data");
 
       const user = {
@@ -63,6 +64,7 @@ export default function FriendsPage() {
         followers: data.user.followers || [],
         following: data.user.following || [],
       };
+
       setUserData(user);
 
       await Promise.all([
@@ -80,30 +82,30 @@ export default function FriendsPage() {
     emails: string[],
     setState: (friends: Friend[]) => void
   ) => {
-    const friends: Friend[] = [];
+    if (emails.length === 0) {
+      setState([]);
+      return;
+    }
 
-    await Promise.all(
-      emails.map(async (email) => {
-        try {
-          const res = await fetch(
-            `/api/getUserByEmail?email=${encodeURIComponent(email)}`
-          );
-          const data = await res.json();
-          if (res.ok && data.user) {
-            friends.push({
-              name: data.user.name,
-              username: data.user.username,
-              profilePicture: data.user.profilePicture,
-              email: email,
-            });
-          }
-        } catch (err) {
-          console.error("Error fetching friend:", err);
-        }
-      })
-    );
+    try {
+      const res = await fetch("/api/getbatchfriends", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ emails }),
+      });
 
-    setState(friends);
+      const data = await res.json();
+
+      if (res.ok) {
+        setState(data.users);
+      } else {
+        console.error("Failed batch fetch:", data.error);
+        setState([]);
+      }
+    } catch (err) {
+      console.error("Batch fetch error:", err);
+      setState([]);
+    }
   };
 
   const handleFollowBack = async (friendEmail: string) => {
