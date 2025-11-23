@@ -173,6 +173,7 @@ export default function Bookmarks() {
               <PostCard
                 key={post._id}
                 post={post}
+                defaultPostColor="#ffffff"
                 firebaseUser={firebaseUser}
                 userData={userData}
                 likedPosts={{}}

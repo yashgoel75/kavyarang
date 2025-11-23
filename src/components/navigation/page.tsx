@@ -1,5 +1,5 @@
 "use client";
-import { Home, Bookmark, User, Bell, Compass } from "lucide-react";
+import { Home, Bookmark, User, Bell, Compass, Settings } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
@@ -36,17 +36,6 @@ export default function Navigation() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
-      if (user?.email) {
-        try {
-          const res = await fetch(
-            `/api/notifications?email=${encodeURIComponent(user.email)}`
-          );
-          const data = await res.json();
-          setHasNotification((data.notifications || []).length > 0);
-        } catch (err) {
-          console.error("Failed to fetch notifications", err);
-        }
-      }
     });
     return () => unsubscribe();
   }, []);
@@ -55,12 +44,8 @@ export default function Navigation() {
     { name: Home, url: "dashboard", title: "Home" },
     { name: Bookmark, url: "bookmark", title: "Bookmarks" },
     { name: Compass, url: "discover", title: "Discover" },
-    {
-      name: Bell,
-      url: "notifications",
-      title: "Notifications",
-      hasNotification,
-    },
+    { name: Settings, url: "settings", title: "Settings" },
+
     { name: User, url: "account", title: "Account" },
   ];
 
@@ -69,34 +54,56 @@ export default function Navigation() {
   const [isDiscoverPage, setIsDiscoverPage] = useState(false);
   const [isNotificationsPage, setIsNotificationsPage] = useState(false);
   const [isAccountPage, setIsAccountPage] = useState(false);
+  const [isSettingsPage, setIsSettingsPage] = useState(false);
 
   useEffect(() => {
     if (pathname.includes("dashboard")) {
       setIsBookmarkPage(false);
       setIsNotificationsPage(false);
       setIsAccountPage(false);
+      setIsSettingsPage(false);
+      setIsDiscoverPage(false);
+
       setIsDashboardPage(true);
     } else if (pathname.includes("bookmark")) {
       setIsNotificationsPage(false);
       setIsAccountPage(false);
       setIsDashboardPage(false);
+      setIsSettingsPage(false);
+      setIsDiscoverPage(false);
+
       setIsBookmarkPage(true);
     } else if (pathname.includes("notifications")) {
       setIsBookmarkPage(false);
       setIsAccountPage(false);
       setIsDashboardPage(false);
+      setIsSettingsPage(false);
+      setIsDiscoverPage(false);
+
       setIsNotificationsPage(true);
     } else if (pathname.includes("account")) {
       setIsBookmarkPage(false);
       setIsNotificationsPage(false);
       setIsDashboardPage(false);
+      setIsSettingsPage(false);
+      setIsDiscoverPage(false);
+
       setIsAccountPage(true);
     } else if (pathname.includes("discover")) {
       setIsBookmarkPage(false);
       setIsNotificationsPage(false);
       setIsDashboardPage(false);
       setIsAccountPage(false);
+      setIsSettingsPage(false);
+
       setIsDiscoverPage(true);
+    } else if (pathname.includes("settings")) {
+      setIsBookmarkPage(false);
+      setIsNotificationsPage(false);
+      setIsDashboardPage(false);
+      setIsAccountPage(false);
+      setIsDiscoverPage(false);
+      setIsSettingsPage(true);
     }
   }, []);
 
@@ -142,14 +149,12 @@ export default function Navigation() {
                 icon.url == "discover" && isDiscoverPage
                   ? "border-yellow-700"
                   : "border-white"
+              } ${
+                icon.url == "settings" && isSettingsPage
+                  ? "border-yellow-700"
+                  : "border-white"
               }`}
             />
-
-            {icon.hasNotification && icon.url === "notifications" && (
-              <span className="absolute -top-2 -right-2 w-3 h-3 transition-all group-hover:-top-2.5 group-hover:-right-2.5">
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-yellow-500"></span>
-              </span>
-            )}
           </Link>
         ))}
       </div>

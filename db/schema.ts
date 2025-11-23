@@ -49,6 +49,7 @@ const UserSchema = new Schema({
     following: [String],
     isVerified: Boolean,
     likes: [String],
+    defaultPostColor: String,
     notifications: [NotificationSchema],
 }, { timestamps: true });
 

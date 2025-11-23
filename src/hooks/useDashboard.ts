@@ -22,6 +22,7 @@ export interface User {
     profilePicture?: string;
     posts?: Post[];
     snapchat: string;
+    defaultPostColor: string;
     instagram: string;
     isVerified: boolean;
     followers: string[];

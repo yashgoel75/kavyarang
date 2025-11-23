@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { LogOut, Search, UserIcon, Menu, X } from "lucide-react";
+import React, { useCallback, useState } from "react";
+import { LogOut, Search, UserIcon, Menu, X, Bell } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { User } from "@/hooks/useDashboard";
 
@@ -11,7 +11,13 @@ interface HeaderProps {
   isMobile: boolean;
 }
 
-export default function DashboardHeader({ userData, onSidebarToggle, isSidebarOpen, onLogout, isMobile }: HeaderProps) {
+export default function DashboardHeader({
+  userData,
+  onSidebarToggle,
+  isSidebarOpen,
+  onLogout,
+  isMobile,
+}: HeaderProps) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -35,17 +41,37 @@ export default function DashboardHeader({ userData, onSidebarToggle, isSidebarOp
     </>
   );
 
+  const [hasNotification, setHasNotification] = useState(false);
+
+  const fetchNotifications = useCallback(async (email: string) => {
+    try {
+      const res = await fetch(
+        `/api/notifications?email=${encodeURIComponent(email)}`
+      );
+      const data = await res.json();
+      setHasNotification((data.notifications || []).length > 0);
+    } catch (err) {
+      console.error("Failed to fetch notifications", err);
+    }
+  }, []);
+
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
       <div className="flex items-center justify-between px-4 md:px-6 h-16">
-        <button className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition" onClick={onSidebarToggle}>
+        <button
+          className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition"
+          onClick={onSidebarToggle}
+        >
           {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
 
         <div className="flex items-center gap-3 md:gap-4 ml-auto">
           {isMobile ? (
             <>
-              <button className="cursor-pointer hover:bg-gray-100 p-2 rounded-md transition" onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}>
+              <button
+                className="cursor-pointer hover:bg-gray-100 p-2 rounded-md transition"
+                onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
+              >
                 <Search size={22} />
               </button>
               {isMobileSearchOpen && (
@@ -65,28 +91,54 @@ export default function DashboardHeader({ userData, onSidebarToggle, isSidebarOp
           <div className="relative">
             {userData ? (
               <>
-                <button className="p-2 rounded-full hover:bg-gray-100 cursor-pointer transition" onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}>
+                <button
+                  onClick={() => router.push("/account/notifications")}
+                  className="user mr-2 icon-btn relative p-1 rounded-full hover:bg-gray-100 cursor-pointer transition active:scale-95"
+                >
+                  <Bell size={25} strokeWidth={1.75} />
+
+                  {hasNotification && (
+                    <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-yellow-500"></span>
+                  )}
+                </button>
+                <button
+                  className="p-2 rounded-full hover:bg-gray-100 cursor-pointer transition"
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                >
                   <UserIcon size={25} strokeWidth={1.75} />
                 </button>
                 {isUserMenuOpen && (
-                    <>
-                    <div className="fixed inset-0 z-40" onClick={() => setIsUserMenuOpen(false)}></div>
+                  <>
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    ></div>
                     <div className="absolute right-0 mt-2 min-w-[160px] bg-white border border-gray-200 rounded-md shadow-lg z-50">
-                        <div className="px-4 py-2 border-b border-gray-200">
+                      <div className="px-4 py-2 border-b border-gray-200">
                         <p className="font-semibold">{userData.name}</p>
-                        <p className="text-sm text-gray-500">{userData.email}</p>
-                        </div>
-                        <button onClick={onLogout} className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2 cursor-pointer">
+                        <p className="text-sm text-gray-500">
+                          {userData.email}
+                        </p>
+                      </div>
+                      <button
+                        onClick={onLogout}
+                        className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2 cursor-pointer"
+                      >
                         <LogOut size={16} /> Logout
-                        </button>
+                      </button>
                     </div>
-                    </>
+                  </>
                 )}
               </>
             ) : (
-               <div className="flex gap-2">
-                  <button onClick={() => router.push("/auth/login")} className="bg-yellow-600 text-white px-4 py-1 rounded">Login</button>
-               </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => router.push("/auth/login")}
+                  className="bg-yellow-600 text-white px-4 py-1 rounded"
+                >
+                  Login
+                </button>
+              </div>
             )}
           </div>
         </div>

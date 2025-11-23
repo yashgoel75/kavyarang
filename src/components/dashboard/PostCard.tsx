@@ -37,6 +37,7 @@ interface PostCardProps {
   userData: User | null;
   likedPosts: Record<string, boolean>;
   bookmarkedPosts: Record<string, boolean>;
+  defaultPostColor: string;
   handleLike: (id: string) => void;
   handleBookmark: (id: string) => void;
   getTextColor: (color: string) => string;
@@ -52,6 +53,7 @@ export default function PostCard({
   userData,
   likedPosts,
   bookmarkedPosts,
+  defaultPostColor,
   handleLike,
   handleBookmark,
   getTextColor,
@@ -61,6 +63,12 @@ export default function PostCard({
 }: PostCardProps) {
   const [showShareOptions, setShowShareOptions] = useState(false);
   const readingTime = Math.ceil(post.content.split(" ").length / 200);
+
+  const activeColor =
+  defaultPostColor && defaultPostColor !== "null"
+    ? defaultPostColor
+    : post.color || "#ffffff";
+
 
   const [copied, setCopied] = useState(false);
 
@@ -89,8 +97,8 @@ export default function PostCard({
     <div
       key={post._id}
       style={{
-        backgroundColor: post.color || "#ffffff",
-        color: getTextColor(post.color || "#ffffff"),
+        backgroundColor: activeColor,
+        color: getTextColor(activeColor),
       }}
       onClick={() => {
         showShareOptions ? setShowShareOptions(false) : null;
@@ -173,7 +181,7 @@ export default function PostCard({
       <div
         className="flex items-center justify-between w-full mt-4 pt-3 border-t text-sm"
         style={{
-          borderColor: getTextColor(post.color || "#ffffff") + "20",
+          borderColor: getTextColor(activeColor) + "20",
         }}
       >
         <div className="flex gap-3 items-center">
@@ -183,7 +191,7 @@ export default function PostCard({
             className="flex items-center gap-2 transition-transform hover:scale-110 disabled:cursor-not-allowed"
             style={{
               color: getIconColor(
-                post.color || "#ffffff",
+                activeColor,
                 likedPosts[post._id]
               ),
             }}
@@ -193,11 +201,11 @@ export default function PostCard({
               viewBox="0 0 20 20"
               fill={
                 likedPosts[post._id]
-                  ? getIconColor(post.color || "#ffffff", true)
+                  ? getIconColor(activeColor, true)
                   : "none"
               }
               stroke={getIconColor(
-                post.color || "#ffffff",
+                activeColor,
                 likedPosts[post._id]
               )}
               strokeWidth="1.5"
@@ -211,12 +219,12 @@ export default function PostCard({
             </svg>
             <span className="text-sm font-semibold">{post.likes}&nbsp;</span>
             <MessageCircle
-              color={getCommentColor(post.color || "#ffffff")}
+              color={getCommentColor(activeColor)}
               size={18}
               strokeWidth="1.5"
             ></MessageCircle>
             <span
-              style={{ color: getCommentColor(post.color || "#ffffff") }}
+              style={{ color: getCommentColor(activeColor) }}
               className="text-sm font-semibold"
             >
               {post.comments.length}
@@ -238,7 +246,7 @@ export default function PostCard({
               stroke={
                 bookmarkedPosts[post._id]
                   ? "currentColor"
-                  : getCommentColor(post.color || "#ffffff")
+                  : getCommentColor(activeColor)
               }
               strokeWidth="1.5"
             >
@@ -259,9 +267,9 @@ export default function PostCard({
             <div
               className="absolute bottom-10 right-0 w-36 rounded-xl shadow-xl p-1 flex flex-col gap-2 text-sm animate-fadeIn z-50"
               style={{
-                backgroundColor: getTextColor(post.color || "#ffffff"),
+                backgroundColor: getTextColor(activeColor),
                 color: getBackgroundColor(
-                  getTextColor(post.color || "#ffffff")
+                  getTextColor(activeColor)
                 ),
               }}
             >

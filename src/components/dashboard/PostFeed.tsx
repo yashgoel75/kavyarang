@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import PostCard from "./PostCard"; // Assuming this exists
 import { User, Post } from "@/hooks/useDashboard";
 import { useRouter } from "next/navigation";
@@ -32,6 +32,8 @@ export default function PostFeed({
 }: FeedProps) {
   const [filter, setFilter] = useState<"ALL" | "FRIENDS">("ALL");
   const router = useRouter();
+
+  const defaultPostColor = userData?.defaultPostColor;
 
   const getInitials = (name: string) =>
     name
@@ -89,6 +91,7 @@ export default function PostFeed({
             <PostCard
               key={post._id}
               post={post}
+              defaultPostColor={defaultPostColor || "null"}
               firebaseUser={firebaseUser}
               userData={userData}
               likedPosts={likedPosts}
