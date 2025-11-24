@@ -41,6 +41,7 @@ export default function Dashboard() {
           loading={loading}
           isOpen={isSidebarOpen}
           isMobile={isMobile}
+          onLogout={handleLogout}
           onClose={() => setSidebarOpen(false)}
         />
 

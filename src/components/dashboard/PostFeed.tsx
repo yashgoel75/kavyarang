@@ -86,7 +86,34 @@ export default function PostFeed({
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {displayPosts?.length ? (
+        {loadingPosts ? (
+          [...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="border border-gray-200 p-5 rounded-lg bg-white shadow-sm animate-pulse space-y-4"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gray-300"></div>
+                <div className="h-4 w-24 bg-gray-300 rounded"></div>
+              </div>
+
+              <div className="h-5 w-40 bg-gray-300 rounded mt-3"></div>
+
+              <div className="h-3 w-16 bg-gray-200 rounded"></div>
+
+              <div className="h-4 w-full bg-gray-200 rounded"></div>
+              <div className="h-4 w-3/4 bg-gray-200 rounded"></div>
+              <div className="h-4 w-2/3 bg-gray-200 rounded"></div>
+
+              <div className="w-full h-48 bg-gray-300 rounded-md"></div>
+
+              <div className="flex items-center gap-6 mt-4">
+                <div className="h-4 w-10 bg-gray-200 rounded"></div>
+                <div className="h-4 w-10 bg-gray-200 rounded"></div>
+              </div>
+            </div>
+          ))
+        ) : displayPosts?.length ? (
           displayPosts.map((post) => (
             <PostCard
               key={post._id}
@@ -107,7 +134,7 @@ export default function PostFeed({
           ))
         ) : (
           <div className="col-span-full flex justify-center py-20 text-gray-500">
-            {loadingPosts ? "Loading..." : "No posts found"}
+            No posts found
           </div>
         )}
       </div>

@@ -131,12 +131,65 @@ export default function UserProfile() {
     return (
       <>
         <Header />
-        <main className="flex items-center justify-center h-[70vh]">
-          <div className="text-center">
-            <div className="w-12 h-12 border-3 border-gray-300 border-t-[#bd9864ff] rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading profile...</p>
+        <main className="max-w-5xl mx-auto px-4 py-10 min-h-[85vh] inter-normal space-y-10">
+          <div className="mb-10">
+            <h2 className="text-3xl font-bold text-gray-800 text-center">
+              Account
+            </h2>
+          </div>
+          <div className="flex-1 space-y-4 md:flex justify-around gap-1 bg-white shadow-sm rounded-xl p-2 md:p-8 mb-8 border border-gray-100">
+            <div className="lg:w-lg p-5">
+              <div className="flex flex-col items-center space-y-6">
+                <div className="w-32 h-32 rounded-full bg-gray-300 animate-pulse"></div>
+
+                <div className="text-center w-full space-y-3">
+                  <div className="h-5 w-40 bg-gray-300 rounded-md mx-auto animate-pulse"></div>
+                  <div className="h-4 w-32 bg-gray-200 rounded-md mx-auto animate-pulse"></div>
+                  <div className="h-4 w-48 bg-gray-200 rounded-md mx-auto animate-pulse"></div>
+                  <div className="h-8 w-28 bg-gray-300 rounded-md mx-auto animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-1 min-w-[300px] rounded-xl shadow-lg border-gray-100 p-5">
+              <div className="flex flex-col space-y-4">
+                <div className="flex gap-4 justify-around bg-gray-50 md:flex-col md:space-y-4 px-3 py-5 rounded-lg shadow-xl">
+                  <div className="text-center">
+                    <div className="h-6 w-10 bg-gray-300 mx-auto rounded-md animate-pulse"></div>
+                    <div className="h-4 w-20 bg-gray-200 mx-auto mt-2 rounded-md animate-pulse"></div>
+                  </div>
+
+                  <div className="text-center">
+                    <div className="h-6 w-10 bg-gray-300 mx-auto rounded-md animate-pulse"></div>
+                    <div className="h-4 w-20 bg-gray-200 mx-auto mt-2 rounded-md animate-pulse"></div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-5 mt-5">
+                  <div className="h-12 bg-gray-300 rounded-xl animate-pulse"></div>
+                  <div className="h-12 bg-gray-300 rounded-xl animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-5">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="border border-gray-200 p-5 rounded-lg bg-white shadow-sm animate-pulse space-y-3"
+              >
+                <div className="h-5 w-40 bg-gray-300 rounded"></div>
+                <div className="h-4 w-20 bg-gray-200 rounded"></div>
+                <div className="h-4 w-full bg-gray-200 rounded"></div>
+                <div className="h-4 w-3/4 bg-gray-200 rounded"></div>
+                <div className="h-48 w-full bg-gray-300 rounded-md"></div>
+                <div className="h-4 w-16 bg-gray-200 rounded"></div>
+              </div>
+            ))}
           </div>
         </main>
+        <Navigation />
         <Footer />
       </>
     );

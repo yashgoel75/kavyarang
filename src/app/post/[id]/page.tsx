@@ -9,6 +9,7 @@ import Navigation from "@/components/navigation/page";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { Check } from "lucide-react";
+import { Heart, Bookmark, MessageCircle } from "lucide-react";
 
 interface Author {
   _id: string;
@@ -115,9 +116,9 @@ export default function PostPage() {
   const checkUserInteractions = async (postId: string, email: string) => {
     try {
       const res = await fetch(
-        `/api/interactions?email=${encodeURIComponent(email)}&postIds=${encodeURIComponent(
-          JSON.stringify([postId])
-        )}`
+        `/api/interactions?email=${encodeURIComponent(
+          email
+        )}&postIds=${encodeURIComponent(JSON.stringify([postId]))}`
       );
       const data = await res.json();
       if (res.ok) {
@@ -193,7 +194,10 @@ export default function PostPage() {
       );
 
       // Add to organizedComments as root
-      setOrganizedComments((prev) => [...prev, { ...data.comment, replies: [] }]);
+      setOrganizedComments((prev) => [
+        ...prev,
+        { ...data.comment, replies: [] },
+      ]);
 
       setCommentText("");
     } catch (e) {
@@ -277,7 +281,9 @@ export default function PostPage() {
     (comment: Comment, level = 0) => (
       <div
         key={comment._id}
-        className={`${level > 0 ? "ml-8 mt-4" : "mt-6"} border-l-2 border-gray-200 pl-4`}
+        className={`${
+          level > 0 ? "ml-8 mt-4" : "mt-6"
+        } border-l-2 border-gray-200 pl-4`}
       >
         <div className="flex items-start gap-3">
           <div
@@ -286,7 +292,11 @@ export default function PostPage() {
           >
             <div className="relative w-10 h-10 rounded-full overflow-hidden">
               {comment.author.profilePicture ? (
-                <Image src={comment.author.profilePicture} alt={comment.author.name} fill />
+                <Image
+                  src={comment.author.profilePicture}
+                  alt={comment.author.name}
+                  fill
+                />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#bd9864ff] to-[#dbb56aff] text-sm font-semibold text-white">
                   {getInitials(comment.author.name)}
@@ -309,7 +319,9 @@ export default function PostPage() {
               >
                 {comment.author.name}
               </span>
-              <span className="text-gray-500 text-sm">@{comment.author.username}</span>
+              <span className="text-gray-500 text-sm">
+                @{comment.author.username}
+              </span>
               <span className="text-gray-400 text-xs">
                 {new Date(comment.createdAt).toLocaleDateString()}
               </span>
@@ -374,8 +386,61 @@ export default function PostPage() {
     return (
       <>
         <Header />
-        <main className="flex items-center justify-center h-[70vh]">
-          <div>Loading post...</div>
+        <main className="max-w-4xl mx-auto px-4 py-10 min-h-[85vh]">
+          <article className="rounded-lg shadow-lg p-8 mb-8 bg-white animate-pulse">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 bg-gray-300 rounded-full" />
+
+              <div className="space-y-2">
+                <div className="w-32 h-4 bg-gray-300 rounded"></div>
+                <div className="w-20 h-3 bg-gray-200 rounded"></div>
+              </div>
+            </div>
+
+            <div className="w-3/4 h-8 bg-gray-300 rounded mb-4"></div>
+
+            <div className="flex gap-4 mb-6">
+              <div className="w-20 h-4 bg-gray-200 rounded"></div>
+              <div className="w-10 h-4 bg-gray-200 rounded"></div>
+              <div className="w-20 h-4 bg-gray-200 rounded"></div>
+            </div>
+
+            <div className="w-full h-80 bg-gray-300 rounded-lg mb-6"></div>
+
+            <div className="space-y-3 mb-6">
+              <div className="w-full h-4 bg-gray-300 rounded"></div>
+              <div className="w-5/6 h-4 bg-gray-300 rounded"></div>
+              <div className="w-4/6 h-4 bg-gray-200 rounded"></div>
+              <div className="w-3/4 h-4 bg-gray-200 rounded"></div>
+            </div>
+
+            <div className="flex gap-3 mb-6">
+              <div className="w-16 h-6 bg-gray-300 rounded-full"></div>
+              <div className="w-14 h-6 bg-gray-300 rounded-full"></div>
+              <div className="w-20 h-6 bg-gray-300 rounded-full"></div>
+            </div>
+
+            <div className="flex gap-6 pt-6 border-t">
+              <div className="w-16 h-4 bg-gray-300 rounded"></div>
+              <div className="w-10 h-4 bg-gray-300 rounded"></div>
+              <div className="w-16 h-4 bg-gray-300 rounded"></div>
+            </div>
+          </article>
+
+          <div className="bg-white rounded-lg shadow-lg p-8 animate-pulse">
+            <div className="w-40 h-6 bg-gray-300 rounded mb-6"></div>
+
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="flex gap-4 mb-6">
+                <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
+                <div className="flex-1 space-y-3">
+                  <div className="w-32 h-4 bg-gray-300 rounded"></div>
+                  <div className="w-full h-4 bg-gray-200 rounded"></div>
+                  <div className="w-5/6 h-4 bg-gray-200 rounded"></div>
+                </div>
+              </div>
+            ))}
+          </div>
         </main>
         <Footer />
       </>
@@ -393,8 +458,12 @@ export default function PostPage() {
     );
 
   const textColor = getTextColor(post.color || "#ffffff");
+  const hoverBg = textColor === "#000" ? "bg-black/10" : "bg-white/20";
 
-  const readingTime = Math.max(1, Math.ceil((post.content?.split(/\s+/).length || 0) / 200));
+  const readingTime = Math.max(
+    1,
+    Math.ceil((post.content?.split(/\s+/).length || 0) / 200)
+  );
 
   return (
     <>
@@ -411,7 +480,11 @@ export default function PostPage() {
             >
               <div className="relative w-12 h-12 rounded-full overflow-hidden">
                 {post.author.profilePicture ? (
-                  <Image src={post.author.profilePicture} fill alt={post.author.name} />
+                  <Image
+                    src={post.author.profilePicture}
+                    fill
+                    alt={post.author.name}
+                  />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-[#bd9864] text-white text-lg font-semibold">
                     {getInitials(post.author.name)}
@@ -420,7 +493,9 @@ export default function PostPage() {
               </div>
 
               <div>
-                <h3 className="font-semibold hover:underline">{post.author.name}</h3>
+                <h3 className="font-semibold hover:underline">
+                  {post.author.name}
+                </h3>
                 <p className="text-sm opacity-75">@{post.author.username}</p>
               </div>
             </div>
@@ -433,49 +508,76 @@ export default function PostPage() {
               <span>{readingTime} min read</span>
             </div>
           </div>
-
           {post.picture && (
             <div className="relative w-full h-96 rounded-lg overflow-hidden mb-6">
-              <Image src={post.picture} alt={post.title} fill className="object-cover" />
+              <Image
+                src={post.picture}
+                alt={post.title}
+                fill
+                className="object-cover"
+              />
             </div>
           )}
-
           <div
             className="prose max-w-none mb-6"
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
-
           {post.tags?.length > 0 && (
             <div className="flex gap-2 flex-wrap mb-6">
               {post.tags.map((tag) => (
-                <span key={tag} className="px-3 py-1 rounded-full bg-black/10 text-sm">
+                <span
+                  key={tag}
+                  className="px-3 py-1 rounded-full bg-black/10 text-sm"
+                >
                   #{tag}
                 </span>
               ))}
             </div>
           )}
 
-          <div className="flex items-center gap-6 pt-6 border-t">
+          <div className="flex items-center gap-6 pt-6 border-t border-white/30">
             <button
               onClick={handleLike}
-              className={`flex items-center gap-2 ${isLiked ? "text-red-600" : ""}`}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition 
+    ${hoverBg} hover:scale-105 active:scale-95`}
+              style={{ color: isLiked ? "#e63946" : textColor }}
             >
-              ❤️ <span>{post.likes}</span>
+              <Heart
+                size={20}
+                className={`${isLiked ? "fill-[#e63946]" : "fill-none"}`}
+              />
+              <span className="font-medium">{post.likes}</span>
             </button>
 
             <button
               onClick={handleBookmark}
-              className={isBookmarked ? "text-yellow-600" : ""}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition 
+    ${hoverBg} hover:scale-105 active:scale-95`}
+              style={{ color: isBookmarked ? "#f4d03f" : textColor }}
             >
-              ⭐
+              <Bookmark
+                size={20}
+                className={`${isBookmarked ? "fill-[#f4d03f]" : "fill-none"}`}
+              />
+              <span className="font-medium">
+                {isBookmarked ? "Saved" : "Save"}
+              </span>
             </button>
 
-            <span>💬 {post.comments.length}</span>
+            <div
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg`}
+              style={{ color: textColor }}
+            >
+              <MessageCircle size={20} className="opacity-80" />
+              <span className="font-medium">{post.comments.length}</span>
+            </div>
           </div>
         </article>
 
         <div className="bg-white rounded-lg shadow-lg p-8">
-          <h2 className="text-2xl font-bold mb-6">Comments ({post.comments.length})</h2>
+          <h2 className="text-2xl font-bold mb-6">
+            Comments ({post.comments.length})
+          </h2>
 
           {firebaseUser ? (
             <div className="mb-8">

@@ -49,14 +49,14 @@ export default function Settings() {
         "userData",
         JSON.stringify({
           ...parsed,
-          defaultPostColor: useDefaultColor ? defaultColor : null,
+          defaultPostColor: useDefaultColor ? defaultColor : "null",
         })
       );
     } else {
       localStorage.setItem(
         "userData",
         JSON.stringify({
-          defaultPostColor: useDefaultColor ? defaultColor : null,
+          defaultPostColor: useDefaultColor ? defaultColor : "null",
         })
       );
     }
@@ -70,7 +70,7 @@ export default function Settings() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: firebaseUser.email,
-          defaultPostColor: useDefaultColor ? defaultColor : null,
+          defaultPostColor: useDefaultColor ? defaultColor : "null",
         }),
       });
       setNotification({type: 'success', message: 'Settings saved successfully!'});

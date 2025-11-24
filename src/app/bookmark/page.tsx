@@ -35,6 +35,7 @@ export default function Bookmarks() {
     posts?: Post[];
     snapchat: string;
     instagram: string;
+    defaultPostColor: string;
     followers: string[];
     following: string[];
   }
@@ -89,6 +90,8 @@ export default function Bookmarks() {
       setLoading(false);
     }
   };
+
+  const defaultPostColor = userData?.defaultPostColor;
 
   const handleDelete = useCallback(
     async (postId: string) => {
@@ -149,12 +152,46 @@ export default function Bookmarks() {
     [getTextColor]
   );
 
-  if (loading)
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading...
-      </div>
+      <>
+        <Header />
+
+        <div className="min-h-screen bg-gray-50 py-10 px-5 md:px-20">
+          <h2 className="text-3xl font-bold mb-8 text-center">
+            Your Bookmarks
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div
+                key={i}
+                className="border border-gray-200 p-5 rounded-lg bg-white shadow-sm animate-pulse space-y-4"
+              >
+                <div className="h-5 w-40 bg-gray-300 rounded"></div>
+
+                <div className="h-4 w-24 bg-gray-200 rounded"></div>
+
+                <div className="h-4 w-full bg-gray-200 rounded"></div>
+                <div className="h-4 w-3/4 bg-gray-200 rounded"></div>
+                <div className="h-4 w-2/3 bg-gray-200 rounded"></div>
+
+                <div className="h-48 w-full bg-gray-300 rounded-md"></div>
+
+                <div className="flex items-center gap-3 mt-2">
+                  <div className="h-4 w-16 bg-gray-200 rounded"></div>
+                  <div className="h-4 w-10 bg-gray-200 rounded"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <Navigation />
+        <Footer />
+      </>
     );
+  }
 
   return (
     <>
@@ -173,7 +210,7 @@ export default function Bookmarks() {
               <PostCard
                 key={post._id}
                 post={post}
-                defaultPostColor="#ffffff"
+                defaultPostColor={defaultPostColor || "null"}
                 firebaseUser={firebaseUser}
                 userData={userData}
                 likedPosts={{}}

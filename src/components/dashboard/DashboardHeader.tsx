@@ -44,12 +44,33 @@ export default function DashboardHeader({
   const [hasNotification, setHasNotification] = useState(false);
 
   const fetchNotifications = useCallback(async (email: string) => {
+    const CACHE_KEY = `notifications_${email}`;
+    const FIVE_MIN = 5 * 60 * 1000;
+
     try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.expiresAt > Date.now()) {
+          setHasNotification((parsed.data.notifications || []).length > 0);
+          return;
+        }
+      }
+
       const res = await fetch(
         `/api/notifications?email=${encodeURIComponent(email)}`
       );
       const data = await res.json();
+
       setHasNotification((data.notifications || []).length > 0);
+
+      localStorage.setItem(
+        CACHE_KEY,
+        JSON.stringify({
+          data,
+          expiresAt: Date.now() + FIVE_MIN,
+        })
+      );
     } catch (err) {
       console.error("Failed to fetch notifications", err);
     }
@@ -116,10 +137,19 @@ export default function DashboardHeader({
                     <div className="absolute right-0 mt-2 min-w-[160px] bg-white border border-gray-200 rounded-md shadow-lg z-50">
                       <div className="px-4 py-2 border-b border-gray-200">
                         <p className="font-semibold">{userData.name}</p>
+
                         <p className="text-sm text-gray-500">
                           {userData.email}
                         </p>
                       </div>
+                      <button
+                        onClick={() => {
+                          router.push("/account");
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2 cursor-pointer"
+                      >
+                        <UserIcon size={16} /> Account
+                      </button>
                       <button
                         onClick={onLogout}
                         className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2 cursor-pointer"

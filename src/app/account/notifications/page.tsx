@@ -118,7 +118,21 @@ export default function NotificationsPage() {
         <h2 className="text-3xl font-bold text-gray-800 mb-6">Notifications</h2>
 
         {loading ? (
-          <p className="text-center mt-20">Loading notifications...</p>
+          <div className="space-y-4 mt-10">
+            {[...Array(6)].map((_, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm animate-pulse"
+              >
+                <div className="w-12 h-12 rounded-full bg-gray-300"></div>
+
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-40 bg-gray-300 rounded"></div>
+                  <div className="h-3 w-24 bg-gray-200 rounded"></div>
+                </div>
+              </div>
+            ))}
+          </div>
         ) : notifications.length === 0 ? (
           <p className="text-center mt-20 text-gray-500">
             No new notifications
