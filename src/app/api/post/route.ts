@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     }
 
     const post = await Post.findById(postId)
-      .select("title content picture tags likes createdAt author")
+      .select("title color content picture tags likes createdAt author")
       .populate("author", "name username profilePicture isVerified")
       .lean();
 
