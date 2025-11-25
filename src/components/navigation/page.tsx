@@ -1,12 +1,13 @@
 "use client";
 
-import { Home, Bookmark, User, Compass, Settings } from "lucide-react";
+import { Home, Bookmark, User, Compass, Settings, Plus } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter, usePathname } from "next/navigation";
 import { GraduationCap } from "lucide-react";
+import { PlusSquare } from "lucide-react";
 
 export default function Navigation() {
   const [isMobile, setIsMobile] = useState(false);
@@ -44,7 +45,9 @@ export default function Navigation() {
   const navItems = [
     { icon: Home, url: "/dashboard", title: "Home" },
     { icon: Bookmark, url: "/bookmark", title: "Bookmarks" },
-    { icon: Compass, url: "/discover", title: "Discover" },
+        { icon: PlusSquare, url: "/account/createPost", title: "New Post" },
+
+    { icon: Compass, url: "/explore", title: "Explore" },
     // { icon: GraduationCap, url: "/competitions", title: "Competitions" },
     { icon: Settings, url: "/settings", title: "Settings" },
   ];

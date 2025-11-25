@@ -17,7 +17,14 @@ interface SidebarProps {
 }
 
 const SidebarProfile = memo(
-  ({ userData, loading, isOpen, isMobile, onClose, onLogout }: SidebarProps) => {
+  ({
+    userData,
+    loading,
+    isOpen,
+    isMobile,
+    onClose,
+    onLogout,
+  }: SidebarProps) => {
     return (
       <>
         <div
@@ -169,11 +176,14 @@ const SidebarProfile = memo(
                   </div>
                 )}
 
-                <div className="px-6 mt-auto mb-6">
-                    <button onClick={onLogout} className="cursor-pointer w-full px-4 py-3 bg-red-100 text-red-600 rounded-xl hover:bg-red-200 transition-all font-medium">
+                {/* <div className="px-6 mt-auto mb-6">
+                  <button
+                    onClick={onLogout}
+                    className="cursor-pointer w-full px-4 py-3 bg-red-100 text-red-600 rounded-xl hover:bg-red-200 transition-all font-medium"
+                  >
                     Logout
                   </button>
-                </div>
+                </div> */}
               </div>
             ) : null}
           </aside>

@@ -49,6 +49,7 @@ export default function Account() {
   const [usernameAlreadyTaken, setUsernameAlreadyTaken] = useState(false);
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
   const [openMenuPostId, setOpenMenuPostId] = useState<string | null>(null);
+  const [copiedPostId, setCopiedPostId] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -232,6 +233,9 @@ export default function Account() {
     if (!firebaseUser) return;
 
     try {
+      const sure = window.confirm("Are you sure you want to delete this post?");
+      if (!sure) return;
+
       const res = await fetch(`/api/user/posts`, {
         method: "DELETE",
         headers: {
@@ -412,6 +416,13 @@ export default function Account() {
 
     return brightness > 128 ? "#000000" : "#ffffff";
   }
+
+  const handleCopy = async (id: string) => {
+    const url = `${window.location.origin}/post/${id}`;
+    await navigator.clipboard.writeText(url);
+    setCopiedPostId(id);
+    setTimeout(() => setCopiedPostId(null), 2000);
+  };
 
   return (
     <>
@@ -741,18 +752,27 @@ export default function Account() {
                       color: getTextColor(post.color || "#ffffff"),
                     }}
                     className="cursor-pointer border border-gray-200 rounded-lg shadow-sm p-5 hover:shadow-md transition-shadow duration-200"
+                    onClick={() => {
+                      if (openMenuPostId === post._id) {
+                        setOpenMenuPostId(null); // close menu instead of opening post
+                      } else {
+                        router.push(`/post/${post._id}`);
+                      }
+                    }}
                   >
                     <div className="flex relative items-center justify-between">
                       <div>
-                        <h4
-                          className="text-lg font-semibold"
-                          onClick={() => router.push(`/post/${post._id}`)}
-                        >
-                          {post.title}
-                        </h4>
+                        <h4 className="text-lg font-semibold">{post.title}</h4>
                       </div>
 
-                      <div className="">
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation(); // prevent triggering post open
+                          setOpenMenuPostId(
+                            openMenuPostId === post._id ? null : post._id
+                          );
+                        }}
+                      >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           width="20"
@@ -763,12 +783,7 @@ export default function Account() {
                           strokeWidth="2"
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          className="lucide lucide-ellipsis-vertical-icon lucide-ellipsis-vertical cursor-pointer"
-                          onClick={() =>
-                            setOpenMenuPostId(
-                              openMenuPostId === post._id ? null : post._id
-                            )
-                          }
+                          className="lucide lucide-ellipsis-vertical cursor-pointer"
                         >
                           <circle cx="12" cy="12" r="1" />
                           <circle cx="12" cy="5" r="1" />
@@ -777,27 +792,58 @@ export default function Account() {
                       </div>
 
                       {openMenuPostId === post._id && (
-                        <div
-                          className="absolute top-6 right-0 z-10 px-3 py-1 rounded-md text-sm cursor-pointer transition-colors duration-200 hover:bg-red-700 hover:text-white"
-                          onClick={() => handleDelete(post._id)}
-                          style={{
-                            backgroundColor: getTextColor(
-                              post.color || "#ffffff"
-                            ),
-                            color: getBackgroundColor(
-                              getTextColor(post.color || "#ffffff")
-                            ),
-                          }}
-                        >
-                          Delete
+                        <div className="absolute py-2 inter-normal top-6 right-0 z-20 flex flex-col bg-white shadow-md rounded-md overflow-hidden text-sm">
+                          {/* Delete */}
+                          <div
+                            className="px-3 py-1 cursor-pointer hover:bg-red-600 hover:text-white transition"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(post._id);
+                            }}
+                          >
+                            Delete
+                          </div>
+
+                          {/* Share to WhatsApp */}
+                          <div
+                            className="px-3 py-1 cursor-pointer hover:bg-green-600 hover:text-white transition"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const url = `${window.location.origin}/post/${post._id}`;
+                              window.open(
+                                `https://wa.me/?text=${encodeURIComponent(
+                                  url
+                                )}`,
+                                "_blank"
+                              );
+                            }}
+                          >
+                            Share on WhatsApp
+                          </div>
+
+                          {/* Copy Link */}
+                          <div
+                            className="px-3 py-1 cursor-pointer hover:bg-gray-200 transition relative"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCopy(post._id);
+                            }}
+                          >
+                            Copy Link
+                            {copiedPostId === post._id && (
+                              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-green-600">
+                                Copied!
+                              </span>
+                            )}
+                          </div>
                         </div>
                       )}
                     </div>
+
                     <span className="text-xs mb-2">{readingTime} min read</span>
 
                     <p
                       className="text-sm mb-3 leading-relaxed"
-                      onClick={() => router.push(`/post/${post._id}`)}
                       dangerouslySetInnerHTML={{
                         __html:
                           post.content?.length > 120
@@ -807,10 +853,7 @@ export default function Account() {
                     ></p>
 
                     {post.picture && (
-                      <div
-                        className="relative w-full h-48 mb-3 rounded-md overflow-hidden"
-                        onClick={() => router.push(`/post/${post._id}`)}
-                      >
+                      <div className="relative w-full h-48 mb-3 rounded-md overflow-hidden">
                         <Image
                           src={post.picture}
                           alt="Post image"

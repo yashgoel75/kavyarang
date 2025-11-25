@@ -4,6 +4,8 @@ import { User, Post } from "@/hooks/useDashboard";
 import { useRouter } from "next/navigation";
 import { getTextColor, getIconColor, getCommentColor } from "@/lib/utils";
 import { User as FirebaseUser } from "firebase/auth";
+import GradientText from "../GradientText";
+import Link from "next/link";
 
 interface FeedProps {
   posts: Post[] | null;
@@ -60,6 +62,14 @@ export default function PostFeed({
         <p className="text-gray-600">
           Discover amazing content from the community
         </p>
+      </div>
+
+      <div className="flex cursor-pointer justify-center mb-3 py-2 items-center gap-3 text-[20px] md:text-[30px] font-bold text-white bg-gradient-to-tr rounded-lg from-yellow-400 to-yellow-800">
+        <div className="custom-class">
+          <Link target="_blank" href="https://instagram.com/kavyalok.in">
+            Follow Kavyalok on Instagram
+          </Link>
+        </div>
       </div>
 
       <div className="flex gap-4 mb-4">
