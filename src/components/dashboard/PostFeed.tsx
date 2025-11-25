@@ -64,13 +64,11 @@ export default function PostFeed({
         </p>
       </div>
 
-      <div className="flex cursor-pointer justify-center mb-3 py-2 items-center gap-3 text-[20px] md:text-[30px] font-bold text-white bg-gradient-to-tr rounded-lg from-yellow-400 to-yellow-800">
-        <div className="custom-class">
-          <Link target="_blank" href="https://instagram.com/kavyalok.in">
-            Follow Kavyalok on Instagram
-          </Link>
+      <Link target="_blank" href="https://instagram.com/kavyalok.in">
+        <div className="flex cursor-pointer justify-center mb-3 py-2 items-center gap-3 text-[20px] md:text-[30px] font-bold text-white bg-gradient-to-tr rounded-lg from-yellow-400 to-yellow-800">
+          <div className="custom-class">Follow Kavyalok on Instagram</div>
         </div>
-      </div>
+      </Link>
 
       <div className="flex gap-4 mb-4">
         <button

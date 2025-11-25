@@ -32,16 +32,22 @@ export default function Footer() {
         <div>
           <h3 className="text-lg font-semibold mb-3">Platform</h3>
           <ul className="space-y-2 text-sm text-gray-600">
-            <li className="hover:cursor-pointer hover:text-gray-800 transition"
-              onClick={() => router.push("/about")}>
+            <li
+              className="hover:cursor-pointer hover:text-gray-800 transition"
+              onClick={() => router.push("/about")}
+            >
               About Us
             </li>
-            <li className="hover:cursor-pointer hover:text-gray-800 transition"
-              onClick={() => router.push("/team")}>
+            <li
+              className="hover:cursor-pointer hover:text-gray-800 transition"
+              onClick={() => router.push("/team")}
+            >
               Our Team
             </li>
-            <li className="hover:cursor-pointer hover:text-gray-800 transition"
-              onClick={() => router.push("/contact")}>
+            <li
+              className="hover:cursor-pointer hover:text-gray-800 transition"
+              onClick={() => router.push("/contact")}
+            >
               Contact Us
             </li>
           </ul>
@@ -86,12 +92,22 @@ export default function Footer() {
             </li>
             <li>
               <a
-                href="https://linkedin.com/company/kavyalokvips"
+                href="https://linkedin.com/company/kavyalok-in"
                 target="_blank"
                 rel="noreferrer"
                 className="hover:text-gray-800 transition"
               >
                 LinkedIn
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://instagram.com/kavyalok.in"
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-gray-800 transition"
+              >
+                Instagram
               </a>
             </li>
           </ul>
