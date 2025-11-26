@@ -50,6 +50,11 @@ export default function CreatePost() {
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [postColor, setPostColor] = useState("#ffffff");
+
+    const [textColor, setTextColor] = useState("#000000");
+
+  
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user?.email) {
@@ -174,6 +179,16 @@ export default function CreatePost() {
     }
   };
 
+  function getTextColor(bgColor: string): string {
+  if (!bgColor) return "#000000";
+  const hex = bgColor.replace("#", "");
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return luminance > 150 ? "#000000" : "#ffffff";
+  }
+  
   useEffect(() => {
     if (allTags) {
       const extractedTags = allTags
@@ -197,9 +212,9 @@ export default function CreatePost() {
           </h2>
         </div>
 
-        <div className="bg-white shadow-sm rounded-lg p-4 md:p-8 border border-gray-100 space-y-6">
+        <div style={{ backgroundColor: postColor, color: textColor }} className={`shadow-sm rounded-lg p-4 md:p-8 border border-gray-100 space-y-6`}>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium  mb-1">
               Post Title
             </label>
             <input
@@ -212,7 +227,7 @@ export default function CreatePost() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium  mb-1">
               Cover Image (16:9)
             </label>
 
@@ -248,7 +263,7 @@ export default function CreatePost() {
                       className="h-8 w-8 text-gray-400 mb-2"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
+                      stroke={textColor}
                     >
                       <path
                         strokeLinecap="round"
@@ -257,7 +272,7 @@ export default function CreatePost() {
                         d="M7 16a4 4 0 01.88-7.906A5.001 5.001 0 0117 9a4 4 0 010 8H7z"
                       />
                     </svg>
-                    <p className="text-gray-500 text-sm">
+                    <p className="text-sm">
                       Click to upload cover image
                     </p>
                   </>
@@ -275,7 +290,7 @@ export default function CreatePost() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium  mb-1">
               Content
             </label>
             <div className="bg-white rounded-xl p-2 shadow-sm">
@@ -288,7 +303,7 @@ export default function CreatePost() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium  mb-1">
               Tags
             </label>
             <input
@@ -303,7 +318,7 @@ export default function CreatePost() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium  mb-1">
               Color representing your mood the best
             </label>
             <input
@@ -311,6 +326,8 @@ export default function CreatePost() {
               value={color}
               onChange={(e) => {
                 setColor(e.target.value);
+                setPostColor(e.target.value);
+                setTextColor(getTextColor(e.target.value));
                 console.log(color);
               }}
               className="border border-gray-300 px-4 py-2 rounded-md focus:ring-2 focus:ring-[#bd9864ff] focus:border-[#bd9864ff] focus:outline-none transition-all"
