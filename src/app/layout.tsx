@@ -2,6 +2,8 @@ import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import "./globals.css";
 
+import PageTransitionWrapper from "@/components/PageTransitionWrapper";
+
 export const metadata: Metadata = {
   title: "Kavyalok",
   description: "",
@@ -15,8 +17,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {children}
-        <Analytics />
+        <PageTransitionWrapper>
+          {children}
+          <Analytics />
+        </PageTransitionWrapper>
       </body>
     </html>
   );
