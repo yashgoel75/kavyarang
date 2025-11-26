@@ -195,10 +195,9 @@ export default function CreatePost() {
           <h2 className="text-4xl font-bold text-gray-800 mb-1">
             Create a Post
           </h2>
-          <div className="h-0.5 w-20 bg-gradient-to-r from-[#bd9864ff] to-transparent"></div>
         </div>
 
-        <div className="bg-white shadow-sm rounded-lg p-8 border border-gray-100 space-y-6">
+        <div className="bg-white shadow-sm rounded-lg p-4 md:p-8 border border-gray-100 space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Post Title
