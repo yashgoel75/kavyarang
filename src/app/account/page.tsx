@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import snapchat from "../../../public/snapchat.png";
 import instagram from "../../../public/instagram.png";
 import Link from "next/link";
+import { getFirebaseToken } from "@/utils";
 
 interface User {
   name: string;
@@ -109,8 +110,14 @@ export default function Account() {
 
   const fetchUserData = async (email: string): Promise<User | null> => {
     try {
+      const token = await getFirebaseToken();
       const res = await fetch(
-        `/api/user/posts?email=${encodeURIComponent(email)}`
+        `/api/user/posts?email=${encodeURIComponent(email)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load user data");
@@ -136,10 +143,12 @@ export default function Account() {
     setIsUpdating(true);
 
     try {
+      const token = await getFirebaseToken();
       const res = await fetch(`/api/user`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           email: firebaseUser.email,
@@ -175,11 +184,12 @@ export default function Account() {
 
   const uploadProfilePicture = async (file: File) => {
     if (!file) return;
-
+    const token = await getFirebaseToken();
     const signRes = await fetch("/api/signprofilepicture", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ folder: "profilePictures" }),
     });
@@ -236,10 +246,12 @@ export default function Account() {
       const sure = window.confirm("Are you sure you want to delete this post?");
       if (!sure) return;
 
+      const token = await getFirebaseToken();
       const res = await fetch(`/api/user/posts`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           email: firebaseUser.email,
@@ -284,11 +296,13 @@ export default function Account() {
     setIsUploadingImage(true);
     try {
       const imageUrl = await uploadProfilePicture(file);
+      const token = await getFirebaseToken();
 
       const res = await fetch(`/api/user`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           email: firebaseUser.email,

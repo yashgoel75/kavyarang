@@ -13,6 +13,7 @@ import snapchat from "../../../../public/snapchat.png";
 import instagram from "../../../../public/instagram.png";
 import Link from "next/link";
 import { Check } from "lucide-react";
+import { getFirebaseToken } from "@/utils";
 
 interface User {
   name: string;
@@ -63,6 +64,7 @@ export default function UserProfile() {
 
   const fetchUserData = async (username: string) => {
     try {
+      const token = await getFirebaseToken();
       const userRes = await fetch(`/api/getUser?username=${username}`);
       const userData = await userRes.json();
       console.log(userData.user);
@@ -70,7 +72,12 @@ export default function UserProfile() {
         throw new Error(userData.error || "Failed to load user profile");
 
       const postsRes = await fetch(
-        `/api/user/posts?email=${encodeURIComponent(userData.user.email)}`
+        `/api/user/posts?email=${encodeURIComponent(userData.user.email)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const postsData = await postsRes.json();
       if (!postsRes.ok)
@@ -93,10 +100,12 @@ export default function UserProfile() {
 
     setIsFollowLoading(true);
     try {
+      const token = await getFirebaseToken();
       const res = await fetch(`/api/user/follow`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           currentUserEmail: firebaseUser.email,

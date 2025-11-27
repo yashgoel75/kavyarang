@@ -10,6 +10,7 @@ import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 
 import PostCard from "@/components/dashboard/PostCard";
+import { getFirebaseToken } from "@/utils";
 
 export default function Bookmarks() {
   const router = useRouter();
@@ -58,8 +59,14 @@ export default function Bookmarks() {
 
   const fetchBookmarks = async (email: string) => {
     try {
+      const token = await getFirebaseToken();
       const userRes = await fetch(
-        `/api/getUserBookmarks?email=${encodeURIComponent(email)}`
+        `/api/getUserBookmarks?email=${encodeURIComponent(email)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const userJSON = await userRes.json();
 
@@ -98,9 +105,13 @@ export default function Bookmarks() {
       if (!firebaseUser?.email) return;
 
       try {
+        const token = await getFirebaseToken();
         const res = await fetch("/api/bookmark/remove", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
           body: JSON.stringify({
             email: firebaseUser.email,
             postId,

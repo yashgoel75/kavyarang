@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { User, Post } from "../../../../db/schema";
 import { register } from "@/instrumentation";
+import { verifyFirebaseToken } from "@/lib/verifyFirebaseToken";
 
 interface CreatePostRequest {
   title: string;
@@ -13,6 +14,15 @@ interface CreatePostRequest {
 
 export async function POST(req: NextRequest) {
   await register();
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return NextResponse.json({ error: "Missing token" }, { status: 401 });
+  }
+  const token = authHeader.split(" ")[1];
+  const decodedToken = await verifyFirebaseToken(token);
+  if (!decodedToken) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   try {
     const body: CreatePostRequest = await req.json();

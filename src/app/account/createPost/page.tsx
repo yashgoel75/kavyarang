@@ -9,6 +9,7 @@ import Footer from "@/components/footer/page";
 import Navigation from "@/components/navigation/page";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { getFirebaseToken } from "@/utils";
 
 const QuillEditor = dynamic(() => import("@/components/TestEditor"), {
   ssr: false,
@@ -84,9 +85,13 @@ export default function CreatePost() {
   const uploadCoverImage = async (file: File) => {
     setIsUploading(true);
     try {
+      const token = await getFirebaseToken();
       const signRes = await fetch("/api/signPostCovers", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+         },
         body: JSON.stringify({ folder: "postCovers" }),
       });
 
@@ -153,9 +158,13 @@ export default function CreatePost() {
 
     setIsSubmitting(true);
     try {
+      const token = await getFirebaseToken();
       const res = await fetch("/api/createPost", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+         },
         body: JSON.stringify({
           title,
           content,

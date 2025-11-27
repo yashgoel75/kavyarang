@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { getAuth, signOut, onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
+import { getFirebaseToken } from "@/utils";
 
 export interface Post {
     _id: string;
@@ -85,7 +86,12 @@ export function useDashboard() {
 
     const fetchUserData = async (email: string): Promise<User | null> => {
         try {
-            const res = await fetch(`/api/user/posts?email=${encodeURIComponent(email)}`);
+            const token = await getFirebaseToken();
+            const res = await fetch(`/api/user/posts?email=${encodeURIComponent(email)}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             const data = await res.json();
             return res.ok ? data.user : null;
         } catch (err) {
@@ -130,6 +136,7 @@ export function useDashboard() {
             if (newPostIds.length === 0) return;
 
             try {
+                const token = await getFirebaseToken();
                 const res = await fetch(`/api/interactions`, {
                     method: "POST",
                     body: JSON.stringify({
@@ -138,7 +145,10 @@ export function useDashboard() {
                         page,
                         limit: 9,
                     }),
-                    headers: { "Content-Type": "application/json" },
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`
+                    },
                 });
 
                 const data = await res.json();
@@ -188,9 +198,13 @@ export function useDashboard() {
         setLikedPosts(prev => ({ ...prev, [postId]: !prev[postId] }));
 
         try {
+            const token = await getFirebaseToken();
             const res = await fetch(`/api/post/like`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
                 body: JSON.stringify({ postId, email: user.email }),
             });
 
@@ -211,9 +225,13 @@ export function useDashboard() {
         setBookmarkedPosts(prev => ({ ...prev, [postId]: !prev[postId] }));
 
         try {
+            const token = await getFirebaseToken();
             const res = await fetch(`/api/post/bookmark`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
                 body: JSON.stringify({ postId, email: user.email }),
             });
             const data = await res.json();

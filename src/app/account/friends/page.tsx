@@ -8,6 +8,7 @@ import Header from "@/components/header/page";
 import Footer from "@/components/footer/page";
 import Navigation from "@/components/navigation/page";
 import Image from "next/image";
+import { getFirebaseToken } from "@/utils";
 
 interface User {
   name: string;
@@ -88,9 +89,14 @@ export default function FriendsPage() {
     }
 
     try {
+            const token = await getFirebaseToken();
+
       const res = await fetch("/api/getbatchfriends", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+         },
         body: JSON.stringify({ emails }),
       });
 
@@ -111,9 +117,13 @@ export default function FriendsPage() {
   const handleFollowBack = async (friendEmail: string) => {
     if (!firebaseUser) return;
     try {
+      const token = await getFirebaseToken();
       const res = await fetch(`/api/user/follow`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+         },
         body: JSON.stringify({
           currentUserEmail: firebaseUser.email,
           targetEmail: friendEmail,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { register } from "@/instrumentation";
 import { User } from "../../../../db/schema";
 import redis from "@/lib/redis";
+import { verifyFirebaseToken } from "@/lib/verifyFirebaseToken";
 
 interface UserDocument {
   likes?: string[];
@@ -22,6 +23,15 @@ function paginate(array: string[], page: number, limit: number) {
 export async function GET(req: NextRequest) {
   try {
     await register();
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return NextResponse.json({ error: "Missing token" }, { status: 401 });
+    }
+    const token = authHeader.split(" ")[1];
+    const decodedToken = await verifyFirebaseToken(token);
+    if (!decodedToken) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const { searchParams } = new URL(req.url);
     const email = searchParams.get("email");
@@ -77,6 +87,16 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     await register();
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return NextResponse.json({ error: "Missing token" }, { status: 401 });
+    }
+    const token = authHeader.split(" ")[1];
+    const decodedToken = await verifyFirebaseToken(token);
+    if (!decodedToken) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await req.json();
     const { email, postIds, page = 1, limit = 10 } = body;
 

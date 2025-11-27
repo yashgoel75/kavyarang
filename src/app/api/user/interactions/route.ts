@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { register } from "@/instrumentation";
 import { User } from "../../../../../db/schema";
+import { verifyFirebaseToken } from "@/lib/verifyFirebaseToken";
 
 interface UserDocument {
   name: string;
@@ -20,6 +21,16 @@ interface UserDocument {
 export async function GET(req: NextRequest) {
   try {
     await register();
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return NextResponse.json({ error: "Missing token" }, { status: 401 });
+    }
+    const token = authHeader.split(" ")[1];
+    const decodedToken = await verifyFirebaseToken(token);
+    if (!decodedToken) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { searchParams } = new URL(req.url);
     const postId = searchParams.get("postId");
     const email = searchParams.get("email");

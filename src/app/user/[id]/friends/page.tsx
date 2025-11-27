@@ -9,6 +9,7 @@ import Footer from "@/components/footer/page";
 import Navigation from "@/components/navigation/page";
 import Image from "next/image";
 import { Check } from "lucide-react";
+import { getFirebaseToken } from "@/utils";
 
 interface Friend {
   name: string;
@@ -125,9 +126,13 @@ export default function UserFriendsPage() {
     }
 
     try {
+      const token = await getFirebaseToken();
       const res = await fetch("/api/getbatchfriends", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+         },
         body: JSON.stringify({ emails }),
       });
 

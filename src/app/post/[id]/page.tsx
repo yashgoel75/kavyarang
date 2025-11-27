@@ -10,6 +10,7 @@ import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { Check } from "lucide-react";
 import { Heart, Bookmark, MessageCircle } from "lucide-react";
+import { getFirebaseToken } from "@/utils";
 
 interface Author {
   _id: string;
@@ -115,10 +116,16 @@ export default function PostPage() {
 
   const checkUserInteractions = async (postId: string, email: string) => {
     try {
+      const token = await getFirebaseToken();
       const res = await fetch(
         `/api/interactions?email=${encodeURIComponent(
           email
-        )}&postIds=${encodeURIComponent(JSON.stringify([postId]))}`
+        )}&postIds=${encodeURIComponent(JSON.stringify([postId]))}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const data = await res.json();
       if (res.ok) {
@@ -134,9 +141,13 @@ export default function PostPage() {
     if (!firebaseUser || !post) return;
 
     try {
+      const token = await getFirebaseToken();
       const res = await fetch("/api/post/like", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ postId: post._id, email: firebaseUser.email }),
       });
       const data = await res.json();
@@ -154,9 +165,13 @@ export default function PostPage() {
     if (!firebaseUser || !post) return;
 
     try {
+      const token = await getFirebaseToken();
       const res = await fetch("/api/post/bookmark", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+         },
         body: JSON.stringify({ postId: post._id, email: firebaseUser.email }),
       });
 
@@ -175,9 +190,13 @@ export default function PostPage() {
     setIsSubmittingComment(true);
 
     try {
+      const token = await getFirebaseToken();
       const res = await fetch("/api/post/comment", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           postId: post._id,
           email: firebaseUser.email,
@@ -213,9 +232,13 @@ export default function PostPage() {
     setIsSubmittingComment(true);
 
     try {
+      const token = await getFirebaseToken();
       const res = await fetch("/api/post/comment", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           postId: post._id,
           email: firebaseUser.email,

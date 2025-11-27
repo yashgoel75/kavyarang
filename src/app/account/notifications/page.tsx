@@ -9,6 +9,7 @@ import Footer from "@/components/footer/page";
 import Navigation from "@/components/navigation/page";
 import Image from "next/image";
 import { Check } from "lucide-react";
+import { getFirebaseToken } from "@/utils";
 
 interface Notification {
   id: string;
@@ -55,15 +56,26 @@ export default function NotificationsPage() {
 
   const fetchNotifications = async (email: string) => {
     try {
+      const token = await getFirebaseToken();
       const res = await fetch(
-        `/api/notifications?email=${encodeURIComponent(email)}`
+        `/api/notifications?email=${encodeURIComponent(email)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const data = await res.json();
 
       const notificationsWithUser = await Promise.all(
         data.notifications.map(async (notif: Notification) => {
           const userRes = await fetch(
-            `/api/getUserByEmail?email=${encodeURIComponent(notif.fromEmail)}`
+            `/api/getUserByEmail?email=${encodeURIComponent(notif.fromEmail)}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
           );
           const userData = await userRes.json();
           return { ...notif, fromUser: userData.user };
@@ -74,7 +86,10 @@ export default function NotificationsPage() {
 
       await fetch(`/api/notifications/mark-read`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ email }),
       });
     } catch (err) {
