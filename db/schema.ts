@@ -2,6 +2,24 @@ import mongoose from "mongoose";
 
 const { Schema } = mongoose;
 
+const CompetitionSchema = new Schema({
+    coverPhoto: { type: String },
+    name: { type: String, required: true },
+    about: { type: String, required: true },
+    participantLimit: { type: Number },
+    mode: { type: String },
+    venue: { type: String },
+    dateStart: { type: String },
+    dateEnd: { type: String },
+    timeStart: { type: String },
+    timeEnd: { type: String },
+    category: { type: String },
+    fee: { type: Number },
+    judgingCriteria: [String],
+    prizePool: [String],
+    participants: [String],
+});
+
 const CommentSchema = new Schema({
     author: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
     post: { type: Schema.Types.ObjectId, ref: "Post", required: true, index: true },
@@ -55,6 +73,7 @@ const UserSchema = new Schema({
 
 UserSchema.index({ username: 1, email: 1 });
 
+export const Competition = mongoose.models.Competition || mongoose.model("Competition", CompetitionSchema)
 export const User = mongoose.models.User || mongoose.model("User", UserSchema);
 export const Post = mongoose.models.Post || mongoose.model("Post", PostSchema);
 export const Comment = mongoose.models.Comment || mongoose.model("Comment", CommentSchema);

@@ -7,6 +7,7 @@ import { getAuth, signOut, onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { getFirebaseToken } from "@/utils";
 
 export default function Header() {
   const router = useRouter();
@@ -81,8 +82,13 @@ export default function Header() {
         }
       }
 
+      const token = await getFirebaseToken();
       const response = await fetch(
-        `/api/user?email=${encodeURIComponent(email)}`
+        `/api/user?email=${encodeURIComponent(email)}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
       );
       const data = await response.json();
 

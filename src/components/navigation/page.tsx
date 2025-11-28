@@ -49,7 +49,7 @@ export default function Navigation() {
 
     { icon: Compass, url: "/explore", title: "Explore" },
     // { icon: GraduationCap, url: "/competitions", title: "Competitions" },
-    { icon: Settings, url: "/settings", title: "Settings" },
+    { icon: GraduationCap, url: "/competitions", title: "Competitions" },
   ];
 
   const isActive = (url: string) => pathname.startsWith(url);

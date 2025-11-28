@@ -2,6 +2,7 @@ import React, { useCallback, useState } from "react";
 import { LogOut, Search, UserIcon, Menu, X, Bell } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { User } from "@/hooks/useDashboard";
+import { getFirebaseToken } from "@/utils";
 
 interface HeaderProps {
   userData: User | null;
@@ -57,8 +58,13 @@ export default function DashboardHeader({
         }
       }
 
+      const token = await getFirebaseToken();
       const res = await fetch(
-        `/api/notifications?email=${encodeURIComponent(email)}`
+        `/api/notifications?email=${encodeURIComponent(email)}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
       );
       const data = await res.json();
 
