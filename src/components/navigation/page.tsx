@@ -45,11 +45,24 @@ export default function Navigation() {
   const navItems = [
     { icon: Home, url: "/dashboard", title: "Home" },
     { icon: Bookmark, url: "/bookmark", title: "Bookmarks" },
-        { icon: PlusSquare, url: "/account/createPost", title: "New Post" },
+    { icon: PlusSquare, url: "/account/createPost", title: "New Post" },
 
     { icon: Compass, url: "/explore", title: "Explore" },
     // { icon: GraduationCap, url: "/competitions", title: "Competitions" },
-    { icon: GraduationCap, url: "/competitions", title: "Competitions" },
+    {
+      icon:
+        firebaseUser?.email == "kavyalokin@gmail.com"
+          ? GraduationCap
+          : Settings,
+      url:
+        firebaseUser?.email == "kavyalokin@gmail.com"
+          ? "/competitions"
+          : "/settings",
+      title:
+        firebaseUser?.email == "kavyalokin@gmail.com"
+          ? "Competitions"
+          : "Settings",
+    },
   ];
 
   const isActive = (url: string) => pathname.startsWith(url);
@@ -67,7 +80,7 @@ export default function Navigation() {
           <Link key={i} href={item.url} title={item.title} className="relative">
             <item.icon
               size={isMobile ? 30 : 35}
-              className={`cursor-pointer hover:scale-125 transition border-b-2 pb-1 ${
+              className={`hover:scale-125 cursor-pointer transition border-b-2 pb-1 ${
                 isActive(item.url) ? "border-yellow-700" : "border-white"
               }`}
             />
