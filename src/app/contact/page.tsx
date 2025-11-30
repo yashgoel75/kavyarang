@@ -7,6 +7,8 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import instagram from "@/assets/Instagram.png";
 import linkedin from "@/assets/LinkedIn.png";
+import { User, onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 export default function Contact() {
   const [isMobile, setIsMobile] = useState(false);
@@ -16,6 +18,10 @@ export default function Contact() {
       setIsMobile(true);
     }
   }, []);
+
+  const [user, setUser] = useState<User | null>(null);
+
+  const [displayName, setDisplayName] = useState("");
 
   const [isNameEmpty, setIsNameEmpty] = useState(false);
   const [isEmailEmpty, setIsEmailEmpty] = useState(false);
@@ -30,6 +36,14 @@ export default function Contact() {
     subject: "",
     body: "",
   });
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (u) => {
+      setUser(u);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -198,6 +212,29 @@ export default function Contact() {
           </div>
         </div>
       </main>
+      {user?.email == "kavyalokin@gmail.com" ? (
+        <div className="bg-gray-50">
+          <div className="max-w-5xl w-full mx-auto bg-gray-50">
+            <div className="text-xl font-bold py-2">Contact Us</div>
+            <hr></hr>
+            <div className="flex-col space-y-2 my-2">
+              <span className="font-bold">Registered Address:&nbsp;</span>
+              <span>
+                A-33/1, Niti Vihar, Near Lal Mandir, Mubarikpur Main Road,
+                Kirari Suleman Nagar, Delhi-110086
+              </span>
+            </div>
+            <div className="flex-col space-y-2">
+              <span className="font-bold">Mobile Number:&nbsp;</span>
+              <span>+91 8920866347</span>
+            </div>
+            <div className="flex-col space-y-2 py-2">
+              <span className="font-bold">Email:&nbsp;</span>
+              <span>yash.goel8370@gmail.com</span>
+            </div>
+          </div>
+        </div>
+      ) : null}
       <Navigation />
       <Footer />
     </>

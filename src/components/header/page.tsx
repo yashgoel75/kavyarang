@@ -34,8 +34,13 @@ export default function Header() {
         }
       }
 
+      const token = await getFirebaseToken();
       const res = await fetch(
-        `/api/notifications?email=${encodeURIComponent(email)}`
+        `/api/notifications?email=${encodeURIComponent(email)}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
+        }
       );
       const data = await res.json();
 
