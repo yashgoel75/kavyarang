@@ -232,7 +232,11 @@ export default function Contact() {
               <span className="font-bold">Email:&nbsp;</span>
               <span>yash.goel8370@gmail.com</span>
             </div>
+            <div className="flex-col space-y-2 py-2">
+              <span className="font-bold">This website is operated by YASH GOEL&nbsp;</span>
+            </div>
           </div>
+          
         </div>
       ) : null}
       <Navigation />
