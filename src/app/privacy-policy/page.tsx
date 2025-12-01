@@ -8,7 +8,7 @@ export default function PrivacyPolicy() {
   return (
     <>
       <Header />
-      <main className="min-h-screen w-[90%] m-auto my-5">
+      <main className="max-w-4xl mx-auto px-6 py-12 text-[#222] leading-relaxed">
         <h1 className="font-bold text-2xl my-2">Privacy Policy</h1>
 
         <div className="text-lg text-justify space-y-4">

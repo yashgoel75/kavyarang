@@ -75,6 +75,12 @@ export default function Footer() {
             >
               Refund & Cancellation
             </li>
+            <li
+              className="hover:cursor-pointer hover:text-gray-800 transition"
+              onClick={() => router.push("/shipping-policy")}
+            >
+              Shipping
+            </li>
           </ul>
         </div>
 
