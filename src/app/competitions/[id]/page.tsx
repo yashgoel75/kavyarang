@@ -218,16 +218,8 @@ export default function CompetitionDetailPage() {
                 </ul>
               </section>
             )}
-            {prizePool?.length > 0 && (
-              <section>
-                <h2 className="text-xl font-semibold mb-2">Prize Pool</h2>
-                <ul className="list-disc ml-6 text-gray-700">
-                  {prizePool.map((prize, i) => (
-                    <li key={i}>{prize}</li>
-                  ))}
-                </ul>
-              </section>
-            )}
+            Winner will get featured on KavyaRang's annual magazine and will get
+            to participate in 3 MUNs with us.
             <div className="mt-6">
               {isRegistered ? (
                 <button className="px-6 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed">
