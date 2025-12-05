@@ -8,6 +8,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import { getFirebaseToken } from "@/utils";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, User } from "firebase/auth";
+import { useRouter } from "next/navigation";
 
 interface Competition {
   _id: string;
@@ -29,6 +30,7 @@ interface Competition {
 
 export default function CompetitionDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const competitionId = typeof params.id === "string" ? params.id : "";
   const searchParams = useSearchParams();
   const paymentStatus = searchParams.get("payment");
@@ -102,7 +104,11 @@ export default function CompetitionDetailPage() {
   }
 
   const handlePayNow = async () => {
-    if (!firebaseUser || !competition) return;
+    if (!competition) return;
+    if (!firebaseUser) {
+      router.push("/auth/login");
+      return;
+    }
 
     try {
       const token = await getFirebaseToken();
@@ -116,7 +122,10 @@ export default function CompetitionDetailPage() {
 
       const res = await fetch("/api/payu/checkout", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(paymentData),
       });
 
@@ -146,8 +155,10 @@ export default function CompetitionDetailPage() {
     }
   };
 
-  if (loading) return <p className="text-center mt-12">Loading competition...</p>;
-  if (!competition) return <p className="text-center mt-12">Competition not found.</p>;
+  if (loading)
+    return <p className="text-center mt-12">Loading competition...</p>;
+  if (!competition)
+    return <p className="text-center mt-12">Competition not found.</p>;
 
   const {
     coverPhoto,
@@ -166,7 +177,8 @@ export default function CompetitionDetailPage() {
     participants,
   } = competition;
 
-  const isRegistered = firebaseUser?.email && participants?.includes(firebaseUser.email);
+  const isRegistered =
+    firebaseUser?.email && participants?.includes(firebaseUser.email);
 
   return (
     <>
@@ -183,14 +195,22 @@ export default function CompetitionDetailPage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           <div className="md:col-span-2 space-y-6">
-            <img src={coverPhoto} alt={name} className="rounded-lg shadow-md w-full h-auto" />
+            <img
+              src={coverPhoto}
+              alt={name}
+              className="rounded-lg shadow-md w-full h-auto"
+            />
             <section>
-              <h2 className="text-2xl font-semibold mb-3">About the Competition</h2>
+              <h2 className="text-2xl font-semibold mb-3">
+                About the Competition
+              </h2>
               <p className="text-gray-700 leading-relaxed">{about}</p>
             </section>
             {judgingCriteria?.length > 0 && (
               <section>
-                <h2 className="text-xl font-semibold mb-2">What You Will Be Judged On</h2>
+                <h2 className="text-xl font-semibold mb-2">
+                  What You Will Be Judged On
+                </h2>
                 <ul className="list-disc ml-6 text-gray-700 space-y-1">
                   {judgingCriteria.map((crit, i) => (
                     <li key={i}>{crit}</li>
@@ -226,14 +246,26 @@ export default function CompetitionDetailPage() {
           <aside className="space-y-4 p-5 border rounded-lg bg-gray-50 shadow-sm">
             <h3 className="text-lg font-semibold mb-3">Event Details</h3>
             <div className="space-y-2 text-gray-700">
-              <p><strong>Mode:</strong> {mode}</p>
               <p>
-                <strong>Date:</strong> {new Date(dateStart).toLocaleDateString()} – {new Date(dateEnd).toLocaleDateString()}
+                <strong>Mode:</strong> {mode}
               </p>
-              <p><strong>Time:</strong> {timeStart} – {timeEnd}</p>
-              <p><strong>Participant Limit:</strong> {participantLimit}</p>
-              <p><strong>Category:</strong> {category}</p>
-              <p><strong>Registration Fee:</strong> ₹{fee}</p>
+              <p>
+                <strong>Date:</strong>{" "}
+                {new Date(dateStart).toLocaleDateString()} –{" "}
+                {new Date(dateEnd).toLocaleDateString()}
+              </p>
+              <p>
+                <strong>Time:</strong> {timeStart} – {timeEnd}
+              </p>
+              <p>
+                <strong>Participant Limit:</strong> {participantLimit}
+              </p>
+              <p>
+                <strong>Category:</strong> {category}
+              </p>
+              <p>
+                <strong>Registration Fee:</strong> ₹{fee}
+              </p>
             </div>
           </aside>
         </div>

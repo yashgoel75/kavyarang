@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import GradientText from "@/components/GradientText";
 import { getAuth, signOut, onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { Home as HomeIcon } from "lucide-react";
+import { Ticket } from "lucide-react";
 
 import "./page.css";
 
@@ -16,18 +18,17 @@ export default function Home() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
-      if (user?.email) {
-        const timer = setTimeout(() => {
-          router.replace("/dashboard");
-        }, 1500);
-      } else {
-        const timer = setTimeout(() => {
-          router.replace("/auth/login");
-        }, 1500);
-      }
     });
     return () => unsubscribe();
   }, []);
+
+  function goToDashboard() {
+    if (user?.email) {
+      router.replace("/dashboard");
+    } else {
+      router.replace("/auth/login");
+    }
+  }
 
   return (
     <main className="main-container bg-[#2E2B26] flex flex-col items-center justify-center min-h-screen p-4">
@@ -39,13 +40,20 @@ export default function Home() {
         Kavyalok
       </span>
 
-      {loading && (
-        <div className="loader mt-8">
-          <div></div>
-          <div></div>
-          <div></div>
+      <div className="flex-col md:flex md:flex-row gap-5 mt-5 space-y-5 md:space-y-0">
+        <div onClick={goToDashboard} className="px-5 py-2 w-65 flex justify-center rounded-lg border-2 border-gray-500 hover:border-yellow-700 cursor-pointer transition">
+          <button className="flex cursor-pointer">
+            <HomeIcon />
+            &nbsp;Dashboard
+          </button>
         </div>
-      )}
+        <div onClick={() => {router.push("/competitions")}} className="px-5 py-2 w-65 flex justify-center rounded-lg border-2 border-gray-500 hover:border-yellow-700 cursor-pointer transition">
+          <button className="flex cursor-pointer">
+            <Ticket />
+            &nbsp;Competitions and Events
+          </button>
+        </div>
+      </div>
     </main>
   );
 }
