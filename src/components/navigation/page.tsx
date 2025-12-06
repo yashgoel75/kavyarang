@@ -50,18 +50,10 @@ export default function Navigation() {
     { icon: Compass, url: "/explore", title: "Explore" },
     // { icon: GraduationCap, url: "/competitions", title: "Competitions" },
     {
-      icon:
-        firebaseUser?.email == "kavyalokin@gmail.com"
-          ? GraduationCap
-          : Settings,
-      url:
-        firebaseUser?.email == "kavyalokin@gmail.com"
-          ? "/competitions"
-          : "/settings",
-      title:
-        firebaseUser?.email == "kavyalokin@gmail.com"
-          ? "Competitions"
-          : "Settings",
+      icon: GraduationCap,
+
+      url: "/competitions",
+      title: "Competitions",
     },
   ];
 
