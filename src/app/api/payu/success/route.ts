@@ -30,21 +30,35 @@ export async function POST(req: Request) {
     return new NextResponse(
       `
     <html>
-      <head>
-        <title>Success</title>
-        <script>
-          // Redirect after 3 seconds
-          setTimeout(() => {
-            window.location.href = "/competitions/${productinfo}";
-          }, 3000);
-        </script>
-      </head>
-      <body style="font-family: sans-serif;">
-        <h1>Payment Successful</h1>
-        <p>You are now registered for the competition.</p>
-        <p>Redirecting you to the competition page...</p>
-      </body>
-    </html>
+
+<head>
+    <title>Success</title>
+    <script>
+        let sec = 3;
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("timer").innerText = sec;
+
+            setInterval(() => {
+            if (sec > 0)
+                sec--;
+                document.getElementById("timer").innerText = sec;
+                if (sec === 1) {
+                    window.location.href = "/competitions/${productinfo}";
+                }
+            }, 1000);
+        });
+    </script>
+
+</head>
+
+<body style="">
+    <h1>Payment Successful</h1>
+    <p>You are now registered for the competition.</p>
+    <p>Redirecting you to the competition page in <span id="timer"></span> seconds</p>
+    </p>
+</body>
+
+</html>
   `,
       {
         headers: { "Content-Type": "text/html" },

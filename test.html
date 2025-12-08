@@ -1,19 +1,4 @@
-import { NextResponse } from "next/server";
-
-export async function POST(req: Request) {
-    try {
-        const formData = await req.formData();
-        const status = formData.get("status") as string;
-        const productinfo = formData.get("productinfo") as string;
-        const email = formData.get("email") as string;
-
-        if (!status || !productinfo) {
-            return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-        }
-
-        return new NextResponse(
-            `
-    <html>
+<html>
 
 <head>
     <title>Failure</title>
@@ -42,17 +27,3 @@ export async function POST(req: Request) {
 </body>
 
 </html>
-  `,
-            {
-                headers: { "Content-Type": "text/html" },
-            }
-        );
-
-
-    } catch (err: unknown) {
-        console.error("PayU Success Error:", err);
-        return NextResponse.json(
-            "Error"
-        );
-    }
-}
