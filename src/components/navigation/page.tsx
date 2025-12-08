@@ -46,15 +46,16 @@ export default function Navigation() {
     { icon: Home, url: "/dashboard", title: "Home" },
     { icon: Bookmark, url: "/bookmark", title: "Bookmarks" },
     { icon: PlusSquare, url: "/account/createPost", title: "New Post" },
-
     { icon: Compass, url: "/explore", title: "Explore" },
     // { icon: GraduationCap, url: "/competitions", title: "Competitions" },
-    {
-      icon: GraduationCap,
+    // {
+    //   icon: GraduationCap,
 
-      url: "/competitions",
-      title: "Competitions",
-    },
+    //   url: "/competitions",
+    //   title: "Competitions",
+    // },
+    { icon: Settings, url: "/settings", title: "Settings" },
+
   ];
 
   const isActive = (url: string) => pathname.startsWith(url);
