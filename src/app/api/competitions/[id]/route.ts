@@ -2,17 +2,11 @@ import { NextResponse } from "next/server";
 import { Competition } from "../../../../../db/schema";
 import { register } from "@/instrumentation";
 
-// ---------------------------------------------------------
-// GET SINGLE COMPETITION BY ID
-// ---------------------------------------------------------
-export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: Request, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
   try {
     await register();
-
-    const comp = await Competition.findById(params.id).lean();
+    const comp = await Competition.findById(id).lean();
 
     if (!comp) {
       return NextResponse.json(
@@ -27,31 +21,21 @@ export async function GET(
     });
   } catch (error: any) {
     console.error("Error fetching single competition:", error);
-
     return NextResponse.json(
-      {
-        success: false,
-        error: error.message || "Server error",
-      },
+      { success: false, error: error.message || "Server error" },
       { status: 500 }
     );
   }
 }
 
-// ---------------------------------------------------------
-// (OPTIONAL) UPDATE COMPETITION (FOR ADMIN)
-// ---------------------------------------------------------
-export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+
+export async function PUT(req: Request, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
   try {
     await register();
     const body = await req.json();
 
-    const updated = await Competition.findByIdAndUpdate(params.id, body, {
-      new: true,
-    });
+    const updated = await Competition.findByIdAndUpdate(id, body, { new: true });
 
     if (!updated) {
       return NextResponse.json(
@@ -70,17 +54,12 @@ export async function PUT(
   }
 }
 
-// ---------------------------------------------------------
-// (OPTIONAL) DELETE COMPETITION
-// ---------------------------------------------------------
-export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+
+export async function DELETE(req: Request, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
   try {
     await register();
-
-    const deleted = await Competition.findByIdAndDelete(params.id);
+    const deleted = await Competition.findByIdAndDelete(id);
 
     if (!deleted) {
       return NextResponse.json(
