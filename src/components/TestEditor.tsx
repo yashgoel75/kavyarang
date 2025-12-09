@@ -19,7 +19,7 @@ export default function QuillEditor({ value, onChange }: QuillEditorProps) {
         const existingToolbars =
           containerRef.current.querySelectorAll(".ql-toolbar");
         existingToolbars.forEach((toolbar) => toolbar.remove());
-      }
+      }9
 
       quillInstance.current = new Quill(editorRef.current, {
         theme: "snow",
